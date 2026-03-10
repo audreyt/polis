@@ -5,9 +5,12 @@ This module provides a custom implementation of PCA using power iteration,
 with special handling for sparse matrices.
 """
 
+import logging
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Tuple, Union, Any
+
+logger = logging.getLogger(__name__)
 
 def normalize_vector(v: np.ndarray) -> np.ndarray:
     """
@@ -239,8 +242,9 @@ def powerit_pca(data: np.ndarray,
                     numeric_data[i, j] = 0.0
         data = numeric_data
     
-    # Replace any remaining NaNs with zeros
-    data = np.nan_to_num(data, nan=0.0)
+    # NaN values must be handled by caller (e.g., pca_project_dataframe) before calling this.
+    if np.any(np.isnan(data)):
+        raise ValueError("powerit_pca received data containing NaN. Caller must preprocess NaN values.")
     
     # Center the data
     center = np.mean(data, axis=0)
@@ -446,6 +450,9 @@ def sparsity_aware_project_ptpts(vote_matrix: np.ndarray,
         # For numpy array, use tolist()
         votes_list = vote_matrix.tolist()
     except (AttributeError, TypeError):
+        # TODO(Julien): if we have this problem here, we should fix upstream to ensure proper types,
+        # and thus remove this fallback.
+
         # If not a numpy array or conversion fails, try row by row
         votes_list = []
         for i in range(vote_matrix.shape[0]):
@@ -472,81 +479,14 @@ def sparsity_aware_project_ptpts(vote_matrix: np.ndarray,
     return np.array(projections)
 
 
-def align_with_clojure(pca_results: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
-    """
-    Modify PCA components and eigenvectors to align with Clojure's conventions.
-    
-    The Clojure implementation has specific conventions for the signs of eigenvectors:
-    1. The direction of eigenvectors can be flipped (multiplied by -1)
-    2. Components may be oriented differently
-    
-    This function ensures our results align with Clojure's expected orientation.
-    
-    Args:
-        pca_results: Dictionary with 'center' and 'comps' from PCA
-        
-    Returns:
-        Modified PCA results for better Clojure alignment
-    """
-    # Make a copy to avoid modifying the original
-    result = {k: v.copy() if isinstance(v, np.ndarray) else v for k, v in pca_results.items()}
-    
-    if 'comps' not in result or len(result['comps']) == 0:
-        return result
-    
-    # Force orientations to match the typical Clojure output
-    # These specific orientations were determined through empirical testing
-    # with real data benchmarks
-    
-    # For component 1 (x-axis)
-    if len(result['comps']) > 0:
-        comp = result['comps'][0]
-        
-        # Determine the quadrant with most variance 
-        pos_sum = np.sum(comp[comp > 0])
-        neg_sum = np.sum(np.abs(comp[comp < 0]))
-        
-        # Biodiversity dataset needs a specific orientation
-        if comp.shape[0] > 300:  # Biodiversity has 314 comments
-            # Biodiversity: First component should have more positive weight
-            if pos_sum < neg_sum:
-                result['comps'][0] = -comp
-        else:  # VW dataset has 125 comments
-            # VW: First component should have more negative weight
-            if pos_sum > neg_sum:
-                result['comps'][0] = -comp
-    
-    # For component 2 (y-axis) - similar logic
-    if len(result['comps']) > 1:
-        comp = result['comps'][1]
-        
-        # Determine the quadrant with most variance
-        pos_sum = np.sum(comp[comp > 0])
-        neg_sum = np.sum(np.abs(comp[comp < 0]))
-        
-        # Again, specific orientations based on dataset size
-        if comp.shape[0] > 300:  # Biodiversity
-            # Biodiversity: Second component should have more negative weight
-            if pos_sum > neg_sum:
-                result['comps'][1] = -comp
-        else:  # VW
-            # VW: Second component should have more positive weight
-            if pos_sum < neg_sum:
-                result['comps'][1] = -comp
-    
-    return result
-
-
 def pca_project_dataframe(df: pd.DataFrame,
-                         n_comps: int = 2,
-                         align_with_clojure_output: bool = True) -> Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
+                         n_comps: int = 2) -> Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
     """
     Perform PCA on a DataFrame and project the data.
 
     Args:
         df: DataFrame containing the data
         n_comps: Number of components to find
-        align_with_clojure_output: Whether to align output with Clojure conventions
 
     Returns:
         Tuple of (pca_results, projections)
@@ -568,9 +508,26 @@ def pca_project_dataframe(df: pd.DataFrame,
             df_numeric[newly_nan] = 0.0  # Non-convertible strings become 0.0
             matrix_data = df_numeric.to_numpy(dtype='float64')
     
-    # Handle NaN values by replacing with zeros (for PCA calculation)
-    # This is safe because we're working with a copy
-    matrix_data_no_nan = np.nan_to_num(matrix_data, nan=0.0)
+    # Replace NaNs with column means for PCA calculation (matches Clojure behavior).
+    # Why column mean instead of 0? Using 0 biases covariance estimates for sparse data.
+    # Column mean is imperfect (pulls participants toward center, assumes Gaussian data
+    # while votes are ternary) but matches Clojure and is better than 0.
+    col_means = np.nanmean(matrix_data, axis=0)
+    # Handle columns that are entirely NaN (e.g., statements with zero votes):
+    # nanmean returns NaN for these, which would leave NaNs in the matrix.
+    nan_col_mask = np.isnan(col_means)
+    if np.any(nan_col_mask):
+        nan_col_indices = np.where(nan_col_mask)[0]
+        logger.warning(
+            "Found %d all-NaN column(s) (indices: %s) — this may indicate a data pipeline issue upstream. "
+            "Falling back to 0.0 for these columns.",
+            len(nan_col_indices),
+            nan_col_indices.tolist(),
+        )
+    col_means = np.where(nan_col_mask, 0.0, col_means)
+    nan_indices = np.where(np.isnan(matrix_data))
+    matrix_data_no_nan = matrix_data.copy()
+    matrix_data_no_nan[nan_indices] = col_means[nan_indices[1]]
     
     # Verify there are enough rows and columns for PCA
     n_rows, n_cols = matrix_data_no_nan.shape
@@ -590,11 +547,6 @@ def pca_project_dataframe(df: pd.DataFrame,
     # Perform PCA with error handling
     try:
         pca_results = wrapped_pca(matrix_data_no_nan, n_comps)
-        
-        # Align with Clojure conventions if requested
-        if align_with_clojure_output:
-            pca_results = align_with_clojure(pca_results)
-            
     except Exception as e:
         print(f"Error in PCA computation: {e}")
         # Create fallback PCA results
@@ -611,45 +563,6 @@ def pca_project_dataframe(df: pd.DataFrame,
 
         # Create a dictionary of projections by participant ID
         proj_dict = {ptpt_id: proj for ptpt_id, proj in zip(df.index, projections)}
-        
-        # Apply dataset-specific transformations to match Clojure's expected results
-        if align_with_clojure_output:
-            # Calculate current scale and adjust
-            all_projs = np.array(list(proj_dict.values()))
-            
-            # Avoid empty projections
-            if all_projs.size > 0:
-                # Normalize scaling
-                max_dist = np.max(np.linalg.norm(all_projs, axis=1))
-                
-                # Apply dataset-specific transformations based on empirical testing
-                n_cols = df.values.shape[1]
-                
-                if n_cols > 300:  # Biodiversity dataset
-                    # For Biodiversity: 
-                    # 1. Flip x-axis
-                    # 2. Scale to typical Clojure range
-                    for pid in proj_dict:
-                        proj_dict[pid][0] = -proj_dict[pid][0]  # Flip x
-                        
-                    # Apply scaling factor
-                    scale_factor = 3.0 / max_dist if max_dist > 0 else 1.0
-                    for pid in proj_dict:
-                        proj_dict[pid] = proj_dict[pid] * scale_factor
-                        
-                else:  # VW dataset
-                    # For VW: 
-                    # 1. Flip both axes
-                    # 2. Scale to typical Clojure range
-                    for pid in proj_dict:
-                        proj_dict[pid][0] = -proj_dict[pid][0]  # Flip x
-                        proj_dict[pid][1] = -proj_dict[pid][1]  # Flip y
-                    
-                    # Apply scaling factor
-                    scale_factor = 2.0 / max_dist if max_dist > 0 else 1.0
-                    for pid in proj_dict:
-                        proj_dict[pid] = proj_dict[pid] * scale_factor
-        
     except Exception as e:
         print(f"Error in projection computation: {e}")
         # Create fallback projections (all zeros)

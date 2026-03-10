@@ -74,27 +74,21 @@ def test_powerit_pca_with_zeros():
     assert not np.any(np.isnan(result['comps']))
 
 def test_powerit_pca_with_nans():
-    """Test that powerit_pca handles matrices with NaNs."""
+    """Test that powerit_pca raises ValueError when given NaN values.
+
+    NaN handling is the caller's responsibility (e.g., pca_project_dataframe
+    fills NaN with column means before calling powerit_pca). This ensures
+    explicit preprocessing rather than silent handling.
+    """
+    import pytest
+
     # Create a matrix with some NaNs
     data = np.random.randn(10, 5)
     data[0, 0] = np.nan
-    
-    # Should not raise an exception
-    result = powerit_pca(data, n_comps=2, iters=10)
-    
-    # Should have the expected keys
-    assert 'center' in result
-    assert 'comps' in result
-    
-    # Components should have the correct shape
-    assert result['comps'].shape == (2, 5)
-    
-    # At least some components should be non-zero
-    assert np.any(result['comps'] != 0)
-        
-    # Result should not contain NaNs
-    assert not np.any(np.isnan(result['center']))
-    assert not np.any(np.isnan(result['comps']))
+
+    # Should raise ValueError because NaN must be handled by caller
+    with pytest.raises(ValueError, match="NaN"):
+        powerit_pca(data, n_comps=2, iters=10)
 
 def test_sparsity_aware_project_ptpt():
     """Test that sparsity_aware_project_ptpt handles missing votes."""
@@ -201,7 +195,7 @@ def test_pca_project_dataframe():
         try:
             # Should not raise an exception
             pca_results, proj_dict = pca_project_dataframe(matrix)
-            
+
             # Check results format
             assert isinstance(pca_results, dict)
             assert 'center' in pca_results
@@ -265,7 +259,7 @@ def test_pca_complex_matrix():
 
     # Perform PCA
     pca_results, proj_dict = pca_project_dataframe(df)
-    
+
     # Verify results
     assert 'center' in pca_results
     assert 'comps' in pca_results
