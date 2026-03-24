@@ -1,0 +1,183 @@
+name: Delphi Python Tests
+
+on:
+  push:
+    branches: &branches [ edge, stable ]
+    paths: &paths
+      - 'delphi/**/*.py'
+      - 'delphi/requirements*.txt'
+      - 'delphi/Dockerfile'
+      - '.github/workflows/python-ci.yml'
+  pull_request:
+    branches: *branches
+    paths: *paths
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: 1. Free up disk space on runner
+      run: |
+        echo "Starting disk cleanup..."
+        df -h
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /usr/local/share/powershell
+        echo "Disk space after cleanup:"
+        df -h
+
+    - name: 2. Create .env file for CI
+      run: |
+        if [ -f "test.env" ]; then
+          cp test.env .env
+          echo "Using test.env for CI."
+        else
+          echo "::error::test.env file not found!"
+          exit 1
+        fi
+        
+        # Add hostnames for container-to-container networking
+        # The 'delphi' service in 'docker-compose.test.yml' reads these
+        echo "POSTGRES_HOST=postgres" >> .env
+        echo "DYNAMODB_ENDPOINT=http://dynamodb:8000" >> .env
+        echo "AWS_S3_ENDPOINT=http://minio:9000" >> .env
+
+    - name: 3. Build Docker images
+      run: |
+        # Build all services in the test file (including delphi)
+        docker compose -f docker-compose.test.yml --env-file .env build
+
+    - name: 4. Start all services
+      run: |
+        # Start all services (including delphi) in detached mode
+        # The 'delphi' container will start and run 'tail -f /dev/null'
+        docker compose -f docker-compose.test.yml --env-file .env up -d
+        
+        echo "Waiting for services to be healthy..."
+        sleep 20 # Wait for containers to start
+        docker compose -f docker-compose.test.yml ps
+
+    - name: 5. Check service health
+      run: |
+        # Wait for postgres to be ready
+        echo "Checking postgres..."
+        docker compose -f docker-compose.test.yml exec -T postgres \
+          bash -c 'until pg_isready -U $POSTGRES_USER; do sleep 5; done'
+        echo "Postgres is ready."
+
+    - name: 6. Run Delphi Pytest
+      run: |
+        echo "Copying test files into container..."
+        docker compose -f docker-compose.test.yml cp delphi/tests delphi:/app/tests
+        docker compose -f docker-compose.test.yml cp delphi/real_data delphi:/app/real_data
+        echo "Copying coverage script into container..."
+        docker compose -f docker-compose.test.yml cp delphi/generate_coverage_md.py delphi:/app/generate_coverage_md.py
+        echo "Copying script to be tested into container..."
+        docker compose -f docker-compose.test.yml cp delphi/polismath/run_math_pipeline.py delphi:/app/run_math_pipeline.py
+        docker compose -f docker-compose.test.yml cp delphi/umap_narrative delphi:/app/umap_narrative
+
+        echo "Running tests and generating coverage report..."
+        docker compose \
+          -f docker-compose.test.yml \
+          --env-file .env \
+          exec -T \
+          -e AWS_DEFAULT_REGION=us-east-1 \
+          -e AWS_REGION=us-east-1 \
+          -e AWS_ACCESS_KEY_ID=dummy \
+          -e AWS_SECRET_ACCESS_KEY=dummy \
+          -e POSTGRES_HOST=postgres \
+          -e POSTGRES_PASSWORD=PdwPNS2mDN73Vfbc \
+          -e POSTGRES_DB=polis-test \
+          delphi \
+          bash -c " \
+            set -e; \
+            echo '--- Setting up DynamoDB Tables ---'; \
+            python create_dynamodb_tables.py --region us-east-1; \
+            echo '--- Running Pytest ---'; \
+            export PYTHONPATH=\$PYTHONPATH:/app; \
+            pytest --cov=polismath --cov=run_math_pipeline --cov=./umap_narrative --cov-report=xml:/app/coverage.xml /app/tests --ignore=/app/tests/test_pakistan_conversation.py
+            echo '--- Generating Coverage Comment Text ---'; \
+            python /app/generate_coverage_md.py > /app/coverage-comment.md \
+          "
+
+    - name: 7. Copy coverage report from container
+      if: success()
+      run: |
+        echo "Copying coverage-comment.md from delphi container..."
+        docker compose -f docker-compose.test.yml cp delphi:/app/coverage-comment.md .
+        echo "=== Coverage Report ==="
+        cat coverage-comment.md
+
+    - name: 8. Upload Coverage Report
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage-comment.md
+
+    - name: 9. Post Coverage Comment
+      if: success() && github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const commentBody = fs.readFileSync('coverage-comment.md', 'utf8');
+          const marker = '<!-- delphi-coverage-report -->';
+          const body = `${marker}\n## Delphi Coverage Report\n\n${commentBody}`;
+
+          try {
+            // Find existing coverage comment
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existingComment = comments.find(c => c.body.includes(marker));
+
+            if (existingComment) {
+              // Delete existing comment so new one appears after latest commit
+              await github.rest.issues.deleteComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              console.log('Existing coverage comment deleted.');
+            }
+
+            // Always create a new comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+            console.log('Coverage comment posted successfully.');
+          } catch (error) {
+            if (error.status === 403) {
+              console.log('Note: Could not post coverage comment to PR.');
+              console.log('This is expected for PRs from forks due to GitHub token permissions.');
+              console.log('Coverage report is available in the workflow logs (step 7) and as a downloadable artifact (step 8).');
+            } else {
+              console.log(`Unexpected error posting comment: ${error.message}`);
+            }
+          }
+
+    - name: 10. Show service logs on failure
+      if: failure()
+      run: |
+        echo "=== Delphi service logs ==="
+        docker compose -f docker-compose.test.yml logs delphi || true
+        echo "=== Postgres service logs ==="
+        docker compose -f docker-compose.test.yml logs postgres || true
+        echo "=== DynamoDB service logs ==="
+        docker compose -f docker-compose.test.yml logs dynamodb || true
+
+    - name: 11. Clean up services
+      if: always()
+      run: |
+        echo "Cleaning up services..."
+        docker compose -f docker-compose.test.yml down -v
