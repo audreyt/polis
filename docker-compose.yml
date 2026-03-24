@@ -1,0 +1,354 @@
+# Before running docker compose --profile postgres up for the first time,
+# first copy the env.example file to .env and fill in the values.
+# `cp env.example .env`
+# (edit values as needed)
+#
+# Then, build and run with:
+# `docker compose --profile postgres build`
+# `docker compose --profile postgres up`
+#
+# Subsequently you should only need to run:
+# `docker compose --profile postgres up`
+#
+# Force a full re-build with no cache from previous builds:
+# `docker compose --profile postgres build --no-cache`
+# `docker compose --profile postgres up`
+#
+# If you only changed the .env file, you can do a quick rebuild:
+# `docker compose --profile postgres up --force-recreate`
+#
+# To stop, press CTRL+C (if not running in --detach mode), or run:
+# `docker compose --profile postgres down`
+#
+# omit the --profile postgres flag to run without the postgres service,
+# such as when using postgres on your host machine, or a remote server.
+# (by default, the Makefile will include --profile postgres, unless POSTGRES_DOCKER=false in your env)
+
+services:
+  client-participation-alpha:
+    build:
+      context: ./client-participation-alpha
+      dockerfile: Dockerfile
+      args:
+        - PUBLIC_SERVICE_URL=${PUBLIC_SERVICE_URL}
+        - PUBLIC_AUTH_NAMESPACE=${AUTH_NAMESPACE}
+        - OIDC_CACHE_KEY_PREFIX=${OIDC_CACHE_KEY_PREFIX}
+        - OIDC_CACHE_KEY_ID_TOKEN_SUFFIX=${OIDC_CACHE_KEY_ID_TOKEN_SUFFIX}
+    container_name: client-participation-alpha
+    restart: unless-stopped
+    networks:
+      - "polis-net"
+    ports:
+      - "4321:4321"
+    environment:
+      - PUBLIC_SERVICE_URL=${PUBLIC_SERVICE_URL}
+      - PUBLIC_AUTH_NAMESPACE=${AUTH_NAMESPACE}
+      - INTERNAL_SERVICE_URL=${INTERNAL_SERVICE_URL}
+      - PUBLIC_OIDC_CACHE_KEY_PREFIX=${OIDC_CACHE_KEY_PREFIX}
+      - PUBLIC_OIDC_CACHE_KEY_ID_TOKEN_SUFFIX=${OIDC_CACHE_KEY_ID_TOKEN_SUFFIX}
+    depends_on:
+      - "server"
+
+  server:
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_SSL=${DATABASE_SSL}
+      - AWS_LOG_GROUP_NAME=${AWS_LOG_GROUP_NAME}
+    env_file:
+      - ${SERVER_ENV_FILE:-.env}
+    image: 050917022930.dkr.ecr.us-east-1.amazonaws.com/polis/server:latest
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        NODE_ENV: production
+    labels:
+      polis_tag: ${TAG:-dev}
+    networks:
+      - "polis-net"
+    # Scale the server container to a given number of instances.
+    scale: 1
+    volumes:
+      # Persist logs to a volume, so they can be accessed after the container is stopped.
+      - server-logs:/app/logs
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  math:
+    image: 050917022930.dkr.ecr.us-east-1.amazonaws.com/polis/math:latest
+    build:
+      context: ./math
+    labels:
+      polis_tag: ${TAG:-dev}
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - LOGGING_LEVEL=${MATH_LOG_LEVEL:-warn}
+      - MATH_ENV=${MATH_ENV:-prod}
+      - WEBSERVER_USERNAME=${WEBSERVER_USERNAME}
+      - WEBSERVER_PASS=${WEBSERVER_PASS}
+      # Database connection pool configuration for math service
+      - DATABASE_POOL_SIZE=${MATH_DATABASE_POOL_SIZE:-10}
+    networks:
+      - "polis-net"
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  delphi:
+    image: 050917022930.dkr.ecr.us-east-1.amazonaws.com/polis/delphi:latest
+    build:
+      context: ./delphi
+      target: final
+    labels:
+      polis_tag: ${TAG:-dev}
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - LOG_LEVEL=${DELPHI_LOG_LEVEL:-INFO}
+      - DELPHI_DEV_OR_PROD=${DELPHI_DEV_OR_PROD:-prod}
+      # DynamoDB connection settings for local mode (will be overridden in prod)
+      - DYNAMODB_ENDPOINT=${DYNAMODB_ENDPOINT}
+      - POLL_INTERVAL=${POLL_INTERVAL:-2}
+      # Ollama connection
+      - OLLAMA_HOST=${OLLAMA_HOST}
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      # AWS environment variables (will be provided in prod)
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      # S3 storage for visualization files
+      - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-minioadmin}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-minioadmin}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-polis-delphi}
+      # API keys for LLM services
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-}
+      # PostgreSQL connection details for scripts that use them directly
+      - DATABASE_HOST=${POSTGRES_HOST}
+      - DATABASE_PORT=${POSTGRES_PORT}
+      - DATABASE_NAME=${POSTGRES_DB}
+      - DATABASE_USER=${POSTGRES_USER:-christian}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD:-polis123}
+      - DATABASE_SSL_MODE=${DATABASE_SSL_MODE:-disable}
+      - INSTANCE_SIZE=${INSTANCE_SIZE:-default}
+      - AWS_LOG_GROUP_NAME=${AWS_LOG_GROUP_NAME}
+    networks:
+      - "polis-net"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          memory: ${DELPHI_CONTAINER_MEMORY:-16g}
+          cpus: ${DELPHI_CONTAINER_CPUS:-2}
+    restart: unless-stopped
+
+  postgres:
+    restart: always
+    build:
+      context: ./server
+      # Dockerfile-db (default): migrations-based initialization
+      # Dockerfile-pdb: production dump restoration (requires prodclone.dump)
+      dockerfile: Dockerfile-${DB_INIT_MODE:-db}
+    labels:
+      polis_tag: ${TAG:-dev}
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+    networks:
+      - "polis-net"
+    volumes:
+      # Use separate volumes for different initialization modes to allow clean switching
+      - ${POSTGRES_VOLUME:-postgres_data}:/var/lib/postgresql/data
+      # Mount dump file only when using prodclone mode (DB_INIT_MODE=pdb)
+      - ./prodclone.dump:/docker-entrypoint-initdb.d/prodclone.dump
+    profiles:
+      - postgres
+
+  nginx-proxy:
+    image: docker.io/compdem/polis-nginx-proxy:${TAG:-dev}
+    build:
+      context: ./file-server
+      dockerfile: nginx.Dockerfile
+    labels:
+      polis_tag: ${TAG:-dev}
+    environment:
+      - API_SERVER_PORT=${API_SERVER_PORT:-5000}
+    depends_on:
+      - "client-participation-alpha"
+      - "server"
+    networks:
+      - "polis-net"
+    ports:
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
+
+  file-server:
+    image: docker.io/compdem/polis-file-server:${TAG:-dev}
+    build:
+      context: ./
+      dockerfile: file-server/Dockerfile
+      args:
+        ADMIN_UIDS: ${ADMIN_UIDS}
+        AUTH_AUDIENCE: ${AUTH_AUDIENCE}
+        AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+        AUTH_ISSUER: ${AUTH_ISSUER}
+        AUTH_NAMESPACE: ${AUTH_NAMESPACE}
+        DD_APPLICATION_ID: ${DD_APPLICATION_ID}
+        DD_CLIENT_TOKEN: ${DD_CLIENT_TOKEN}
+        DD_SITE: ${DD_SITE}
+        EMBED_SERVICE_HOSTNAME: ${EMBED_SERVICE_HOSTNAME}
+        GA_TRACKING_ID: ${GA_TRACKING_ID}
+        GIT_HASH: "${GIT_HASH:-placeholder}"
+        NODE_ENV: production
+        OIDC_CACHE_KEY_ID_TOKEN_SUFFIX: ${OIDC_CACHE_KEY_ID_TOKEN_SUFFIX}
+        OIDC_CACHE_KEY_PREFIX: ${OIDC_CACHE_KEY_PREFIX}
+    labels:
+      polis_tag: ${TAG:-dev}
+    environment:
+      - PORT=${STATIC_FILES_PORT:-8080}
+    networks:
+      - "polis-net"
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: polis-dynamodb-local
+    ports:
+      - "8000:8000"
+    networks:
+      - "polis-net"
+    # Persistent storage instead of in-memory
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data"
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/data
+    environment:
+      - JAVA_OPTS=-Xmx1G
+    user: root
+    labels:
+      polis_tag: ${TAG:-dev}
+    profiles:
+      - local-services
+  
+  ses-local:
+    image: dasprid/aws-ses-v2-local:latest
+    container_name: polis-ses-local
+    ports:
+      - "8005:8005"
+    networks:
+      - "polis-net"
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-ses-local-key}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-ses-local-secret}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_SES_V2_LOCAL_DISABLE_AUTH=true
+    labels:
+      polis_tag: ${TAG:-dev}
+    profiles:
+      - local-services
+
+  # Ollama for LLM processing
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    networks:
+      - "polis-net"
+    # Run ollama server
+    command: serve
+    restart: unless-stopped
+    
+  import-worker:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: dev
+    image: polis-server:dev
+    container_name: polis-import-worker
+    command: npx ts-node src/workers/start-import-worker.ts
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=development
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/import-jobs-queue
+      - AWS_S3_ENDPOINT=http://minio:9000
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-polis-delphi}
+      - SERVER_LOG_LEVEL=info
+    restart: on-failure:5
+    networks:
+      - "polis-net"
+    depends_on:
+      - localstack
+      - minio
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    profiles:
+      - local-services
+
+  # SQS
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "./bin/localstack-init:/etc/localstack/init/ready.d" 
+    networks:
+      - "polis-net" 
+    profiles:
+      - local-services
+
+  # MinIO S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      # Setup for auto-bucket creation with public read access
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+      MINIO_DOMAIN: localhost
+      # Allow public policy to be set
+      MINIO_BROWSER: "on"
+    command: server /data --console-address ":9001"
+    networks:
+      - "polis-net"
+    profiles:
+      - local-services
+
+networks:
+  polis-net:
+
+volumes:
+  postgres_data:
+    labels:
+      polis_tag: ${TAG:-dev}
+  prodclone_data:
+    labels:
+      polis_tag: ${TAG:-dev}
+  server-logs:
+    labels:
+      polis_tag: ${TAG:-dev}
+  dynamodb-data:
+    labels:
+      polis_tag: ${TAG:-dev}
+  ollama-models:
+    labels:
+      polis_tag: ${TAG:-dev}
+  minio_data:
+    labels:
+      polis_tag: ${TAG:-dev}

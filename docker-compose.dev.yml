@@ -1,0 +1,119 @@
+# This file is an override to the original docker-compose.yml file, and as such is meant to
+# extend that configuration with some additional concerns for developers, such as ses-local
+# server, and exposing most ports. DO NOT USE THIS IN PRODUCTION.
+
+# This configuration does not work on its own and must be run together with docker-compose.yml,
+# e.g. `docker compose --profile postgres -f docker-compose.yml -f docker-compose.dev.yml up`.
+# (Note the usage in Makefile.)
+# For more information see https://docs.docker.com/compose/extends/
+
+services:
+  server:
+    build:
+      target: dev
+      args:
+        NODE_ENV: development
+    volumes:
+      # This will mount your local polis/server directory so changes can be watched and reloaded.
+      # But it will ignore your local node_modules and instead use a new container volume.
+      - ./server:/app
+      - /app/node_modules
+      # Mount mkcert root CA for TLS verification
+      - ${AUTH_CERTS_PATH:-~/.simulacrum/certs}:/root/.simulacrum/certs:ro
+      # Mount JWT keys for participant authentication
+      - ${AUTH_KEYS_PATH:-./server/keys}:/app/keys:ro
+    ports:
+      - "${API_SERVER_PORT:-5000}:${API_SERVER_PORT:-5000}"
+      - "9229:9229"
+    environment:
+      # Tell Node.js to trust the mkcert CA for HTTPS connections
+      - NODE_EXTRA_CA_CERTS=/root/.simulacrum/certs/rootCA.pem
+
+  math:
+    # command: clojure -X:dev-poller
+    volumes:
+      - ./math:/app
+    ports:
+      # nrepl port
+      - "18975:18975"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - DD_ENABLED=false
+
+  postgres:
+    restart: no
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    # PostgreSQL configuration for development/testing
+    command: >
+      postgres 
+      -c max_connections=${POSTGRES_MAX_CONNECTIONS:-300}
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c work_mem=4MB
+      -c maintenance_work_mem=64MB
+      -c wal_buffers=16MB
+      -c checkpoint_completion_target=0.9
+      -c checkpoint_timeout=10min
+      -c log_connections=on
+      -c log_disconnections=on
+      -c autovacuum=on
+      -c autovacuum_max_workers=3
+      -c autovacuum_naptime=30s
+
+  file-server:
+    build:
+      args:
+        NODE_ENV: development
+    ports:
+      - ${STATIC_FILES_PORT:-8080}:${STATIC_FILES_PORT:-8080}
+
+  ses-local:
+    image: dasprid/aws-ses-v2-local:latest
+    container_name: polis-ses-local
+    ports:
+      - "8005:8005"
+    networks:
+      - "polis-net"
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-ses-local-key}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-ses-local-secret}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+    labels:
+      polis_tag: ${TAG:-dev}
+
+  oidc-simulator:
+    build:
+      context: ./oidc-simulator
+      dockerfile: Dockerfile
+    command: npm run dev
+    ports:
+      - "${AUTH_SIMULATOR_PORT:-3000}:${AUTH_SIMULATOR_PORT:-3000}"
+    volumes:
+      - ./oidc-simulator:/app
+      - /app/node_modules
+      - ${AUTH_CERTS_PATH:-~/.simulacrum/certs}:/root/.simulacrum/certs:ro
+    environment:
+      - AUTH_AUDIENCE=${AUTH_AUDIENCE:-users}
+      - AUTH_CLIENT_ID=${AUTH_CLIENT_ID:-dev-client-id}
+      - AUTH_NAMESPACE=${AUTH_NAMESPACE:-https://pol.is/}
+      - AUTH_SIMULATOR_PORT=${AUTH_SIMULATOR_PORT:-3000}
+    networks:
+      - polis-net
+
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin:latest
+    container_name: polis-dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      - DYNAMO_ENDPOINT=${DYNAMODB_ENDPOINT}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+    networks:
+      - polis-net
+    depends_on:
+      - dynamodb
+    profiles:
+      - local-services

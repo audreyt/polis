@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="2518pt" height="1288pt" viewBox="0.00 0.00 2518.00 1288.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1284)">
+<title>PolisArchitecture</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-1284 2514,-1284 2514,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_VPC</title>
+<polygon fill="lightgrey" stroke="black" points="1856,-118.6 1856,-844.4 2286,-844.4 2286,-118.6 1856,-118.6"/>
+<text text-anchor="middle" x="2071" y="-827.8" font-family="Times,serif" font-size="14.00">VPC</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_PublicSubnets</title>
+<polygon fill="lightgrey" stroke="black" points="1864,-239.2 1864,-811.6 2266,-811.6 2266,-239.2 1864,-239.2"/>
+<text text-anchor="middle" x="2065" y="-795" font-family="Times,serif" font-size="14.00">Public Subnets</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_PrivateSubnets</title>
+<polygon fill="lightgrey" stroke="black" points="1864,-126.6 1864,-204.4 2194,-204.4 2194,-126.6 1864,-126.6"/>
+<text text-anchor="middle" x="2029" y="-187.8" font-family="Times,serif" font-size="14.00">Private Subnets</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_ECR</title>
+<polygon fill="none" stroke="black" points="524,-418.8 524,-496.6 800,-496.6 800,-418.8 524,-418.8"/>
+<text text-anchor="middle" x="662" y="-480" font-family="Times,serif" font-size="14.00">ECR Repos</text>
+</g>
+<g id="clust5" class="cluster">
+<title>cluster_SecurityGroups</title>
+<polygon fill="none" stroke="black" points="2294,-8 2294,-1272 2502,-1272 2502,-8 2294,-8"/>
+<text text-anchor="middle" x="2398" y="-1255.4" font-family="Times,serif" font-size="14.00">Security Groups</text>
+</g>
+<g id="clust6" class="cluster">
+<title>cluster_IAM</title>
+<polygon fill="none" stroke="black" points="1325,-418.8 1325,-609.2 1765,-609.2 1765,-418.8 1325,-418.8"/>
+<text text-anchor="middle" x="1545" y="-592.6" font-family="Times,serif" font-size="14.00">IAM Roles</text>
+</g>
+<g id="clust7" class="cluster">
+<title>cluster_LoadBalancer</title>
+<polygon fill="none" stroke="black" points="1930,-991.8 1930,-1159.4 2286,-1159.4 2286,-991.8 1930,-991.8"/>
+<text text-anchor="middle" x="2108" y="-1142.8" font-family="Times,serif" font-size="14.00">Application Load Balancer</text>
+</g>
+<g id="clust8" class="cluster">
+<title>cluster_CertManager</title>
+<polygon fill="none" stroke="black" points="2104,-879.2 2104,-957 2286,-957 2286,-879.2 2104,-879.2"/>
+<text text-anchor="middle" x="2195" y="-940.4" font-family="Times,serif" font-size="14.00">Certificate Manager</text>
+</g>
+<g id="clust9" class="cluster">
+<title>cluster_SSM</title>
+<polygon fill="none" stroke="black" points="153,-8 153,-496.6 516,-496.6 516,-8 153,-8"/>
+<text text-anchor="middle" x="334.5" y="-480" font-family="Times,serif" font-size="14.00">SSM Parameters</text>
+</g>
+<g id="clust10" class="cluster">
+<title>cluster_SecretsManager</title>
+<polygon fill="none" stroke="black" points="808,-418.8 808,-496.6 972,-496.6 972,-418.8 808,-418.8"/>
+<text text-anchor="middle" x="890" y="-480" font-family="Times,serif" font-size="14.00">Secrets Manager</text>
+</g>
+<g id="clust11" class="cluster">
+<title>cluster_Cloudwatch</title>
+<polygon fill="none" stroke="black" points="23,-8 23,-85.8 117,-85.8 117,-8 23,-8"/>
+<text text-anchor="middle" x="70" y="-69.2" font-family="Times,serif" font-size="14.00">CloudWatch</text>
+</g>
+<g id="clust12" class="cluster">
+<title>cluster_CodeDeploy</title>
+<polygon fill="none" stroke="black" points="980,-329 980,-496.6 1317,-496.6 1317,-329 980,-329"/>
+<text text-anchor="middle" x="1148.5" y="-480" font-family="Times,serif" font-size="14.00">CodeDeploy</text>
+</g>
+<!-- asgWeb -->
+<g id="node1" class="node">
+<title>asgWeb</title>
+<polygon fill="lightblue" stroke="black" points="1871.86,-742.3 1871.86,-778.3 2216.14,-778.3 2216.14,-742.3 1871.86,-742.3"/>
+<text text-anchor="middle" x="1908.83" y="-756.1" font-family="Times,serif" font-size="14.00">ASG Web</text>
+<polyline fill="none" stroke="black" points="1945.79,-742.3 1945.79,-778.3"/>
+<text text-anchor="middle" x="1999.68" y="-756.1" font-family="Times,serif" font-size="14.00">Min: 2, Max: 10</text>
+<polyline fill="none" stroke="black" points="2053.57,-742.3 2053.57,-778.3"/>
+<text text-anchor="middle" x="2134.86" y="-756.1" font-family="Times,serif" font-size="14.00">Instance Type: t3.medium</text>
+</g>
+<!-- db -->
+<g id="node3" class="node">
+<title>db</title>
+<polygon fill="#add8e6" stroke="black" points="1872.21,-135.1 1872.21,-171.1 2185.79,-171.1 2185.79,-135.1 1872.21,-135.1"/>
+<text text-anchor="middle" x="1919.3" y="-148.9" font-family="Times,serif" font-size="14.00">RDS Postgres</text>
+<polyline fill="none" stroke="black" points="1966.39,-135.1 1966.39,-171.1"/>
+<text text-anchor="middle" x="2038.73" y="-148.9" font-family="Times,serif" font-size="14.00">Instance Type: t3.large</text>
+<polyline fill="none" stroke="black" points="2111.06,-135.1 2111.06,-171.1"/>
+<text text-anchor="middle" x="2148.42" y="-148.9" font-family="Times,serif" font-size="14.00">db.polisdb</text>
+</g>
+<!-- asgWeb&#45;&gt;db -->
+<g id="edge19" class="edge">
+<title>asgWeb-&gt;db</title>
+<path fill="none" stroke="purple" d="M2147.82,-741.88C2156.2,-737.14 2163.81,-731.21 2170,-723.8 2184.97,-705.88 2175,-694.85 2175,-671.5 2175,-671.5 2175,-671.5 2175,-512 2175,-372.04 2358.66,-322.31 2272,-212.4 2258.6,-195.4 2218.73,-182.8 2175.07,-173.75"/>
+<polygon fill="purple" stroke="purple" points="2165.4,-171.82 2176.08,-169.36 2169.1,-172.56 2175.2,-173.77 2175.2,-173.77 2175.2,-173.77 2169.1,-172.56 2174.32,-178.19 2165.4,-171.82"/>
+<text text-anchor="middle" x="2254.69" y="-441.1" font-family="Times,serif" font-size="14.00">DB Access (5432)</text>
+</g>
+<!-- webLaunchTemplate -->
+<g id="node25" class="node">
+<title>webLaunchTemplate</title>
+<polygon fill="lightblue" stroke="black" points="1551.92,-652.5 1551.92,-688.5 1686.08,-688.5 1686.08,-652.5 1551.92,-652.5"/>
+<text text-anchor="middle" x="1619" y="-666.3" font-family="Times,serif" font-size="14.00">webLaunchTemplate</text>
+</g>
+<!-- asgWeb&#45;&gt;webLaunchTemplate -->
+<g id="edge1" class="edge">
+<title>asgWeb-&gt;webLaunchTemplate</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1871.61,-746.68C1830.31,-741.47 1786.65,-734.14 1746.78,-723.8 1718.58,-716.49 1688.36,-704.34 1664.4,-693.58"/>
+<polygon fill="blue" stroke="blue" points="1655.3,-689.43 1666.27,-689.49 1658.74,-691 1664.4,-693.58 1664.4,-693.58 1664.4,-693.58 1658.74,-691 1662.53,-697.68 1655.3,-689.43"/>
+<text text-anchor="middle" x="1760.39" y="-711.2" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- asgMathWorker -->
+<g id="node2" class="node">
+<title>asgMathWorker</title>
+<polygon fill="lightblue" stroke="black" points="1872.46,-247.7 1872.46,-283.7 2257.54,-283.7 2257.54,-247.7 1872.46,-247.7"/>
+<text text-anchor="middle" x="1934.12" y="-261.5" font-family="Times,serif" font-size="14.00">ASG Math Worker</text>
+<polyline fill="none" stroke="black" points="1995.77,-247.7 1995.77,-283.7"/>
+<text text-anchor="middle" x="2046.16" y="-261.5" font-family="Times,serif" font-size="14.00">Min: 1, Max: 5</text>
+<polyline fill="none" stroke="black" points="2096.55,-247.7 2096.55,-283.7"/>
+<text text-anchor="middle" x="2177.04" y="-261.5" font-family="Times,serif" font-size="14.00">Instance Type: c5.2xlarge</text>
+</g>
+<!-- asgMathWorker&#45;&gt;db -->
+<g id="edge20" class="edge">
+<title>asgMathWorker-&gt;db</title>
+<path fill="none" stroke="purple" d="M2059.38,-247.42C2053.67,-229.89 2044.75,-202.48 2038.05,-181.89"/>
+<polygon fill="purple" stroke="purple" points="2034.96,-172.42 2042.34,-180.53 2036.13,-176.01 2038.06,-181.93 2038.06,-181.93 2038.06,-181.93 2036.13,-176.01 2033.78,-183.32 2034.96,-172.42"/>
+<text text-anchor="middle" x="2105.07" y="-216.6" font-family="Times,serif" font-size="14.00">DB Access (5432)</text>
+</g>
+<!-- mathWorkerLaunchTemplate -->
+<g id="node26" class="node">
+<title>mathWorkerLaunchTemplate</title>
+<polygon fill="lightblue" stroke="black" points="1666.21,-135.1 1666.21,-171.1 1847.79,-171.1 1847.79,-135.1 1666.21,-135.1"/>
+<text text-anchor="middle" x="1757" y="-148.9" font-family="Times,serif" font-size="14.00">mathWorkerLaunchTemplate</text>
+</g>
+<!-- asgMathWorker&#45;&gt;mathWorkerLaunchTemplate -->
+<g id="edge2" class="edge">
+<title>asgMathWorker-&gt;mathWorkerLaunchTemplate</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M2016.54,-247.3C1962.31,-227.83 1874.45,-196.28 1816.21,-175.36"/>
+<polygon fill="blue" stroke="blue" points="1806.84,-172 1817.77,-171.14 1810.4,-173.27 1816.25,-175.38 1816.25,-175.38 1816.25,-175.38 1810.4,-173.27 1814.73,-179.61 1806.84,-172"/>
+<text text-anchor="middle" x="1978.99" y="-216.6" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- dbSecretArnParam -->
+<g id="node17" class="node">
+<title>dbSecretArnParam</title>
+<polygon fill="lightcyan" stroke="black" points="160.58,-16.5 160.58,-52.5 285.42,-52.5 285.42,-16.5 160.58,-16.5"/>
+<text text-anchor="middle" x="223" y="-30.3" font-family="Times,serif" font-size="14.00">/polis/db-secret-arn</text>
+</g>
+<!-- db&#45;&gt;dbSecretArnParam -->
+<g id="edge21" class="edge">
+<title>db-&gt;dbSecretArnParam</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1959.32,-134.68C1931.15,-128.4 1898.21,-122.03 1868,-118.6 1824.57,-113.67 336.55,-99.35 295,-85.8 278.55,-80.43 262.54,-69.94 249.81,-59.93"/>
+<polygon fill="blue" stroke="blue" points="242.1,-53.57 252.68,-56.46 245.02,-55.98 249.82,-59.93 249.82,-59.93 249.82,-59.93 245.02,-55.98 246.95,-63.4 242.1,-53.57"/>
+<text text-anchor="middle" x="1407.94" y="-98" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- dbHostParam -->
+<g id="node18" class="node">
+<title>dbHostParam</title>
+<polygon fill="lightcyan" stroke="black" points="414.5,-16.5 414.5,-52.5 507.5,-52.5 507.5,-16.5 414.5,-16.5"/>
+<text text-anchor="middle" x="461" y="-30.3" font-family="Times,serif" font-size="14.00">/polis/db-host</text>
+</g>
+<!-- db&#45;&gt;dbHostParam -->
+<g id="edge22" class="edge">
+<title>db-&gt;dbHostParam</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1956.45,-134.65C1928.91,-128.65 1897.15,-122.47 1868,-118.6 1347.75,-49.49 711.64,-37.85 518.98,-35.89"/>
+<polygon fill="blue" stroke="blue" points="509.22,-35.8 519.26,-31.4 513,-35.84 519.21,-35.9 519.21,-35.9 519.21,-35.9 513,-35.84 519.17,-40.4 509.22,-35.8"/>
+<text text-anchor="middle" x="1806.36" y="-98" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- dbPortParam -->
+<g id="node19" class="node">
+<title>dbPortParam</title>
+<polygon fill="lightcyan" stroke="black" points="303.89,-16.5 303.89,-52.5 396.11,-52.5 396.11,-16.5 303.89,-16.5"/>
+<text text-anchor="middle" x="350" y="-30.3" font-family="Times,serif" font-size="14.00">/polis/db-port</text>
+</g>
+<!-- db&#45;&gt;dbPortParam -->
+<g id="edge23" class="edge">
+<title>db-&gt;dbPortParam</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1958.92,-134.61C1930.84,-128.37 1898.07,-122.04 1868,-118.6 1827.61,-113.98 442.73,-100.94 405,-85.8 392,-80.58 380.15,-70.78 370.82,-61.2"/>
+<polygon fill="blue" stroke="blue" points="364.11,-53.87 374.18,-58.21 366.66,-56.66 370.86,-61.25 370.86,-61.25 370.86,-61.25 366.66,-56.66 367.54,-64.28 364.11,-53.87"/>
+<text text-anchor="middle" x="1400.83" y="-98" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- ecrWebRepository -->
+<g id="node4" class="node">
+<title>ecrWebRepository</title>
+<polygon fill="lightgreen" stroke="black" points="667.73,-427.3 667.73,-463.3 792.27,-463.3 792.27,-427.3 667.73,-427.3"/>
+<text text-anchor="middle" x="689.34" y="-441.1" font-family="Times,serif" font-size="14.00">ECR</text>
+<polyline fill="none" stroke="black" points="710.96,-427.3 710.96,-463.3"/>
+<text text-anchor="middle" x="751.61" y="-441.1" font-family="Times,serif" font-size="14.00">polis/server</text>
+</g>
+<!-- ecrMathRepository -->
+<g id="node5" class="node">
+<title>ecrMathRepository</title>
+<polygon fill="lightgreen" stroke="black" points="531.83,-427.3 531.83,-463.3 650.17,-463.3 650.17,-427.3 531.83,-427.3"/>
+<text text-anchor="middle" x="553.44" y="-441.1" font-family="Times,serif" font-size="14.00">ECR</text>
+<polyline fill="none" stroke="black" points="575.06,-427.3 575.06,-463.3"/>
+<text text-anchor="middle" x="612.61" y="-441.1" font-family="Times,serif" font-size="14.00">polis/math</text>
+</g>
+<!-- webSecurityGroup -->
+<g id="node6" class="node">
+<title>webSecurityGroup</title>
+<polygon fill="#ffcccc" stroke="black" points="2301.68,-539.9 2301.68,-575.9 2492.32,-575.9 2492.32,-539.9 2301.68,-539.9"/>
+<text text-anchor="middle" x="2333.59" y="-553.7" font-family="Times,serif" font-size="14.00">Web SG</text>
+<polyline fill="none" stroke="black" points="2365.5,-539.9 2365.5,-575.9"/>
+<text text-anchor="middle" x="2428.91" y="-553.7" font-family="Times,serif" font-size="14.00">Ingress: 22, 80, 443</text>
+</g>
+<!-- webSecurityGroup&#45;&gt;asgWeb -->
+<g id="edge16" class="edge">
+<title>webSecurityGroup-&gt;asgWeb</title>
+<path fill="none" stroke="red" d="M2385.56,-576.26C2361.92,-610.6 2304.09,-687.04 2235,-723.8 2224.18,-729.56 2212.58,-734.4 2200.64,-738.46"/>
+<polygon fill="red" stroke="red" points="2191.23,-741.47 2199.38,-734.14 2194.83,-740.32 2200.75,-738.43 2200.75,-738.43 2200.75,-738.43 2194.83,-740.32 2202.12,-742.71 2191.23,-741.47"/>
+<text text-anchor="middle" x="2365.79" y="-666.3" font-family="Times,serif" font-size="14.00">Allows Traffic</text>
+</g>
+<!-- mathWorkerSecurityGroup -->
+<g id="node7" class="node">
+<title>mathWorkerSecurityGroup</title>
+<polygon fill="#ffcccc" stroke="black" points="2302.49,-16.5 2302.49,-52.5 2493.51,-52.5 2493.51,-16.5 2302.49,-16.5"/>
+<text text-anchor="middle" x="2359.09" y="-30.3" font-family="Times,serif" font-size="14.00">Math Worker SG</text>
+<polyline fill="none" stroke="black" points="2415.69,-16.5 2415.69,-52.5"/>
+<text text-anchor="middle" x="2454.6" y="-30.3" font-family="Times,serif" font-size="14.00">Ingress: 22</text>
+</g>
+<!-- mathWorkerSecurityGroup&#45;&gt;asgMathWorker -->
+<g id="edge17" class="edge">
+<title>mathWorkerSecurityGroup-&gt;asgMathWorker</title>
+<path fill="none" stroke="red" d="M2397.41,-52.8C2395.07,-91.32 2383.65,-184.28 2328,-229.2 2316.68,-238.33 2294.96,-245.12 2268.65,-250.16"/>
+<polygon fill="red" stroke="red" points="2259.14,-251.87 2268.19,-245.67 2262.86,-251.2 2268.98,-250.1 2268.98,-250.1 2268.98,-250.1 2262.86,-251.2 2269.78,-254.53 2259.14,-251.87"/>
+<text text-anchor="middle" x="2429.27" y="-148.9" font-family="Times,serif" font-size="14.00">Allows Traffic</text>
+</g>
+<!-- lbSecurityGroup -->
+<g id="node8" class="node">
+<title>lbSecurityGroup</title>
+<polygon fill="#ffcccc" stroke="black" points="2302.44,-1202.7 2302.44,-1238.7 2463.56,-1238.7 2463.56,-1202.7 2302.44,-1202.7"/>
+<text text-anchor="middle" x="2330.09" y="-1216.5" font-family="Times,serif" font-size="14.00">LB SG</text>
+<polyline fill="none" stroke="black" points="2357.73,-1202.7 2357.73,-1238.7"/>
+<text text-anchor="middle" x="2410.64" y="-1216.5" font-family="Times,serif" font-size="14.00">Ingress: 80, 443</text>
+</g>
+<!-- lb -->
+<g id="node11" class="node">
+<title>lb</title>
+<polygon fill="#ffd700" stroke="black" points="2193,-1090.1 2193,-1126.1 2247,-1126.1 2247,-1090.1 2193,-1090.1"/>
+<text text-anchor="middle" x="2220" y="-1103.9" font-family="Times,serif" font-size="14.00">ALB</text>
+</g>
+<!-- lbSecurityGroup&#45;&gt;lb -->
+<g id="edge18" class="edge">
+<title>lbSecurityGroup-&gt;lb</title>
+<path fill="none" stroke="red" d="M2376.03,-1202.28C2370.81,-1191.09 2362.74,-1176.93 2352,-1167.4 2324.95,-1143.4 2286.44,-1127.93 2257.99,-1119"/>
+<polygon fill="red" stroke="red" points="2248.41,-1116.13 2259.28,-1114.69 2252.04,-1117.22 2258,-1119 2258,-1119 2258,-1119 2252.04,-1117.22 2256.71,-1123.31 2248.41,-1116.13"/>
+<text text-anchor="middle" x="2407.23" y="-1171.6" font-family="Times,serif" font-size="14.00">Allows Traffic</text>
+</g>
+<!-- instanceRole -->
+<g id="node9" class="node">
+<title>instanceRole</title>
+<polygon fill="lightyellow" stroke="black" points="1333.23,-539.9 1333.23,-575.9 1756.77,-575.9 1756.77,-539.9 1333.23,-539.9"/>
+<text text-anchor="middle" x="1379.52" y="-553.7" font-family="Times,serif" font-size="14.00">Instance Role</text>
+<polyline fill="none" stroke="black" points="1425.82,-539.9 1425.82,-575.9"/>
+<text text-anchor="middle" x="1591.29" y="-553.7" font-family="Times,serif" font-size="14.00">SSM, CodeDeploy, SecretsManager, ECR, CloudWatch</text>
+</g>
+<!-- instanceRole&#45;&gt;ecrWebRepository -->
+<g id="edge24" class="edge">
+<title>instanceRole-&gt;ecrWebRepository</title>
+<path fill="none" stroke="orange" d="M1332.92,-547.24C1227.6,-541.49 1098.51,-533.01 983.15,-521.4 903.17,-513.35 879.02,-525.46 804,-496.6 787.74,-490.35 771.53,-479.92 758.44,-470.18"/>
+<polygon fill="orange" stroke="orange" points="750.89,-464.35 761.55,-466.89 753.88,-466.66 758.8,-470.46 758.8,-470.46 758.8,-470.46 753.88,-466.66 756.05,-474.02 750.89,-464.35"/>
+<text text-anchor="middle" x="1014.07" y="-508.8" font-family="Times,serif" font-size="14.00">Pulls From</text>
+</g>
+<!-- instanceRole&#45;&gt;ecrMathRepository -->
+<g id="edge25" class="edge">
+<title>instanceRole-&gt;ecrMathRepository</title>
+<path fill="none" stroke="orange" d="M1332.97,-551.76C1139.77,-546.26 868.94,-536.26 763.15,-521.4 716.03,-514.78 702.14,-516.67 659,-496.6 644.68,-489.94 630.38,-479.99 618.62,-470.7"/>
+<polygon fill="orange" stroke="orange" points="611.11,-464.56 621.7,-467.4 614.04,-466.95 618.85,-470.89 618.85,-470.89 618.85,-470.89 614.04,-466.95 616,-474.37 611.11,-464.56"/>
+<text text-anchor="middle" x="794.07" y="-508.8" font-family="Times,serif" font-size="14.00">Pulls From</text>
+</g>
+<!-- imageTagParameter -->
+<g id="node16" class="node">
+<title>imageTagParameter</title>
+<polygon fill="lightcyan" stroke="black" points="401.51,-427.3 401.51,-463.3 508.49,-463.3 508.49,-427.3 401.51,-427.3"/>
+<text text-anchor="middle" x="455" y="-441.1" font-family="Times,serif" font-size="14.00">/polis/image-tag</text>
+</g>
+<!-- instanceRole&#45;&gt;imageTagParameter -->
+<g id="edge28" class="edge">
+<title>instanceRole-&gt;imageTagParameter</title>
+<path fill="none" stroke="orange" d="M1332.76,-552.62C1108.16,-547.37 768.73,-537.17 639.79,-521.4 585.82,-514.8 569.39,-519.33 520,-496.6 506.09,-490.2 492.42,-480.32 481.23,-471.01"/>
+<polygon fill="orange" stroke="orange" points="473.76,-464.54 484.26,-467.69 476.62,-467.02 481.32,-471.09 481.32,-471.09 481.32,-471.09 476.62,-467.02 478.37,-474.49 473.76,-464.54"/>
+<text text-anchor="middle" x="656.89" y="-508.8" font-family="Times,serif" font-size="14.00">Reads</text>
+</g>
+<!-- instanceRole&#45;&gt;dbSecretArnParam -->
+<g id="edge27" class="edge">
+<title>instanceRole-&gt;dbSecretArnParam</title>
+<path fill="none" stroke="orange" d="M1332.88,-552.88C1083.26,-547.54 683.93,-536.95 535,-521.4 395.72,-506.86 229,-586.34 229,-446.3 229,-446.3 229,-446.3 229,-152.1 229,-122.07 226.99,-87.74 225.3,-64.15"/>
+<polygon fill="orange" stroke="orange" points="228.8,-64.09 224.57,-54.38 221.82,-64.61 228.8,-64.09"/>
+<text text-anchor="middle" x="246.11" y="-306.4" font-family="Times,serif" font-size="14.00">Reads</text>
+</g>
+<!-- webAppEnvVarsSecret -->
+<g id="node20" class="node">
+<title>webAppEnvVarsSecret</title>
+<polygon fill="#f0e68c" stroke="black" points="815.52,-427.3 815.52,-463.3 964.48,-463.3 964.48,-427.3 815.52,-427.3"/>
+<text text-anchor="middle" x="890" y="-441.1" font-family="Times,serif" font-size="14.00">polis-web-app-env-vars</text>
+</g>
+<!-- instanceRole&#45;&gt;webAppEnvVarsSecret -->
+<g id="edge26" class="edge">
+<title>instanceRole-&gt;webAppEnvVarsSecret</title>
+<path fill="none" stroke="orange" d="M1333.45,-539.42C1277.56,-534.22 1217.34,-528.11 1161.79,-521.4 1111.47,-515.33 1099.26,-511.1 1049,-504.6 1016.63,-500.42 1006.99,-506.84 976,-496.6 957.23,-490.4 938.08,-479.71 922.63,-469.77"/>
+<polygon fill="orange" stroke="orange" points="914.54,-464.41 925.36,-466.19 917.69,-466.5 922.87,-469.94 922.87,-469.94 922.87,-469.94 917.69,-466.5 920.39,-473.69 914.54,-464.41"/>
+<text text-anchor="middle" x="1178.89" y="-508.8" font-family="Times,serif" font-size="14.00">Reads</text>
+</g>
+<!-- logGroup -->
+<g id="node21" class="node">
+<title>logGroup</title>
+<polygon fill="#e6e6fa" stroke="black" points="31.09,-16.5 31.09,-52.5 108.91,-52.5 108.91,-16.5 31.09,-16.5"/>
+<text text-anchor="middle" x="70" y="-30.3" font-family="Times,serif" font-size="14.00">Log Group</text>
+</g>
+<!-- instanceRole&#45;&gt;logGroup -->
+<g id="edge30" class="edge">
+<title>instanceRole-&gt;logGroup</title>
+<path fill="none" stroke="orange" d="M1332.9,-557.05C1019.22,-556.25 446.76,-550.66 243,-521.4 160.03,-509.49 70,-530.12 70,-446.3 70,-446.3 70,-446.3 70,-152.1 70,-121.97 70,-87.46 70,-63.84"/>
+<polygon fill="orange" stroke="orange" points="70,-54.1 74.5,-64.1 70,-57.88 70,-64.1 70,-64.1 70,-64.1 70,-57.88 65.5,-64.1 70,-54.1"/>
+<text text-anchor="middle" x="104.41" y="-306.4" font-family="Times,serif" font-size="14.00">Writes Logs</text>
+</g>
+<!-- deploymentBucket -->
+<g id="node22" class="node">
+<title>deploymentBucket</title>
+<polygon fill="tan" stroke="black" points="987.68,-427.3 987.68,-463.3 1134.32,-463.3 1134.32,-427.3 987.68,-427.3"/>
+<text text-anchor="middle" x="1061" y="-441.1" font-family="Times,serif" font-size="14.00">S3 Deployment Bucket</text>
+</g>
+<!-- instanceRole&#45;&gt;deploymentBucket -->
+<g id="edge31" class="edge">
+<title>instanceRole-&gt;deploymentBucket</title>
+<path fill="none" stroke="orange" d="M1431.21,-539.4C1363.98,-529.12 1277.17,-515.96 1200,-504.6 1175.13,-500.94 1167.67,-505.06 1144,-496.6 1126.17,-490.23 1108,-479.75 1093.22,-470.01"/>
+<polygon fill="orange" stroke="orange" points="1085.05,-464.45 1095.85,-466.35 1088.17,-466.58 1093.32,-470.07 1093.32,-470.07 1093.32,-470.07 1088.17,-466.58 1090.78,-473.8 1085.05,-464.45"/>
+<text text-anchor="middle" x="1338.38" y="-508.8" font-family="Times,serif" font-size="14.00">Reads From</text>
+</g>
+<!-- codeDeployRole -->
+<g id="node10" class="node">
+<title>codeDeployRole</title>
+<polygon fill="lightyellow" stroke="black" points="1332.65,-427.3 1332.65,-463.3 1449.35,-463.3 1449.35,-427.3 1332.65,-427.3"/>
+<text text-anchor="middle" x="1391" y="-441.1" font-family="Times,serif" font-size="14.00">CodeDeploy Role</text>
+</g>
+<!-- deploymentGroup -->
+<g id="node24" class="node">
+<title>deploymentGroup</title>
+<polygon fill="#d8bfd8" stroke="black" points="1110.63,-337.5 1110.63,-373.5 1309.37,-373.5 1309.37,-337.5 1110.63,-337.5"/>
+<text text-anchor="middle" x="1210" y="-351.3" font-family="Times,serif" font-size="14.00">CodeDeploy Deployment Group</text>
+</g>
+<!-- codeDeployRole&#45;&gt;deploymentGroup -->
+<g id="edge29" class="edge">
+<title>codeDeployRole-&gt;deploymentGroup</title>
+<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M1368.74,-426.82C1353.87,-415.75 1333.52,-401.74 1314,-392 1303.41,-386.72 1291.85,-381.91 1280.41,-377.66"/>
+<polygon fill="orange" stroke="orange" points="1271.11,-374.33 1282.05,-373.47 1274.67,-375.6 1280.53,-377.7 1280.53,-377.7 1280.53,-377.7 1274.67,-375.6 1279.01,-381.94 1271.11,-374.33"/>
+<text text-anchor="middle" x="1367.03" y="-396.2" font-family="Times,serif" font-size="14.00">Used By</text>
+</g>
+<!-- lb&#45;&gt;lbSecurityGroup -->
+<g id="edge14" class="edge">
+<title>lb-&gt;lbSecurityGroup</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M2242.96,-1126.31C2263.96,-1141.86 2296.04,-1165.18 2324.78,-1184.2 2330.95,-1188.28 2337.57,-1192.49 2344.07,-1196.51"/>
+<polygon fill="blue" stroke="blue" points="2352.37,-1201.61 2341.5,-1200.22 2349.15,-1199.63 2343.85,-1196.38 2343.85,-1196.38 2343.85,-1196.38 2349.15,-1199.63 2346.2,-1192.54 2352.37,-1201.61"/>
+<text text-anchor="middle" x="2338.39" y="-1171.6" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- httpListener -->
+<g id="node12" class="node">
+<title>httpListener</title>
+<polygon fill="#ffa07a" stroke="black" points="1937.98,-1000.3 1937.98,-1036.3 2092.02,-1036.3 2092.02,-1000.3 1937.98,-1000.3"/>
+<text text-anchor="middle" x="2015" y="-1014.1" font-family="Times,serif" font-size="14.00">HTTP Listener (Port 80)</text>
+</g>
+<!-- lb&#45;&gt;httpListener -->
+<g id="edge9" class="edge">
+<title>lb-&gt;httpListener</title>
+<path fill="none" stroke="darkgreen" d="M2192.78,-1095.44C2160.52,-1081.62 2106.08,-1058.31 2065.92,-1041.11"/>
+<polygon fill="darkgreen" stroke="darkgreen" points="2056.91,-1037.25 2067.87,-1037.05 2060.38,-1038.74 2066.1,-1041.19 2066.1,-1041.19 2066.1,-1041.19 2060.38,-1038.74 2064.33,-1045.32 2056.91,-1037.25"/>
+<text text-anchor="middle" x="2166.39" y="-1059" font-family="Times,serif" font-size="14.00">Listens On</text>
+</g>
+<!-- httpsListener -->
+<g id="node13" class="node">
+<title>httpsListener</title>
+<polygon fill="#ffa07a" stroke="black" points="2109.59,-1000.3 2109.59,-1036.3 2278.41,-1036.3 2278.41,-1000.3 2109.59,-1000.3"/>
+<text text-anchor="middle" x="2194" y="-1014.1" font-family="Times,serif" font-size="14.00">HTTPS Listener (Port 443)</text>
+</g>
+<!-- lb&#45;&gt;httpsListener -->
+<g id="edge10" class="edge">
+<title>lb-&gt;httpsListener</title>
+<path fill="none" stroke="darkgreen" d="M2214.86,-1089.75C2211.27,-1077.61 2206.38,-1061.12 2202.25,-1047.15"/>
+<polygon fill="darkgreen" stroke="darkgreen" points="2199.47,-1037.78 2206.63,-1046.09 2200.55,-1041.4 2202.31,-1047.37 2202.31,-1047.37 2202.31,-1047.37 2200.55,-1041.4 2198,-1048.64 2199.47,-1037.78"/>
+<text text-anchor="middle" x="2239.85" y="-1059" font-family="Times,serif" font-size="14.00">Listens On</text>
+</g>
+<!-- webTargetGroup -->
+<g id="node15" class="node">
+<title>webTargetGroup</title>
+<polygon fill="#98fb98" stroke="black" points="1768.39,-887.7 1768.39,-923.7 2093.61,-923.7 2093.61,-887.7 1768.39,-887.7"/>
+<text text-anchor="middle" x="1829.26" y="-901.5" font-family="Times,serif" font-size="14.00">Web Target Group</text>
+<polyline fill="none" stroke="black" points="1890.12,-887.7 1890.12,-923.7"/>
+<text text-anchor="middle" x="1920.49" y="-901.5" font-family="Times,serif" font-size="14.00">Port: 80</text>
+<polyline fill="none" stroke="black" points="1950.85,-887.7 1950.85,-923.7"/>
+<text text-anchor="middle" x="2022.23" y="-901.5" font-family="Times,serif" font-size="14.00">/api/v3/testConnection</text>
+</g>
+<!-- httpListener&#45;&gt;webTargetGroup -->
+<g id="edge11" class="edge">
+<title>httpListener-&gt;webTargetGroup</title>
+<path fill="none" stroke="darkgreen" d="M2001.88,-1000.02C1988.19,-982 1966.58,-953.54 1950.81,-932.79"/>
+<polygon fill="darkgreen" stroke="darkgreen" points="1944.77,-924.83 1954.4,-930.07 1947.06,-927.84 1950.82,-932.79 1950.82,-932.79 1950.82,-932.79 1947.06,-927.84 1947.23,-935.52 1944.77,-924.83"/>
+</g>
+<!-- certificate -->
+<g id="node14" class="node">
+<title>certificate</title>
+<polygon fill="#b0e57c" stroke="black" points="2111.74,-887.7 2111.74,-923.7 2278.26,-923.7 2278.26,-887.7 2111.74,-887.7"/>
+<text text-anchor="middle" x="2149.28" y="-901.5" font-family="Times,serif" font-size="14.00">Certificate</text>
+<polyline fill="none" stroke="black" points="2186.82,-887.7 2186.82,-923.7"/>
+<text text-anchor="middle" x="2232.54" y="-901.5" font-family="Times,serif" font-size="14.00">awstest.pol.is</text>
+</g>
+<!-- httpsListener&#45;&gt;certificate -->
+<g id="edge15" class="edge">
+<title>httpsListener-&gt;certificate</title>
+<path fill="none" stroke="darkgreen" d="M2194.16,-1000.02C2194.31,-982.65 2194.56,-955.58 2194.74,-935.06"/>
+<polygon fill="darkgreen" stroke="darkgreen" points="2194.83,-925.08 2199.24,-935.12 2194.8,-928.86 2194.74,-935.08 2194.74,-935.08 2194.74,-935.08 2194.8,-928.86 2190.24,-935.04 2194.83,-925.08"/>
+<text text-anchor="middle" x="2208.08" y="-969.2" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- httpsListener&#45;&gt;webTargetGroup -->
+<g id="edge12" class="edge">
+<title>httpsListener-&gt;webTargetGroup</title>
+<path fill="none" stroke="darkgreen" d="M2152.62,-999.9C2106.7,-980.59 2032.54,-949.4 1982.8,-928.48"/>
+<polygon fill="darkgreen" stroke="darkgreen" points="1973.7,-924.66 1984.66,-924.38 1977.18,-926.12 1982.92,-928.53 1982.92,-928.53 1982.92,-928.53 1977.18,-926.12 1981.17,-932.68 1973.7,-924.66"/>
+</g>
+<!-- webTargetGroup&#45;&gt;asgWeb -->
+<g id="edge13" class="edge">
+<title>webTargetGroup-&gt;asgWeb</title>
+<path fill="none" stroke="darkgreen" d="M1944.63,-887.4C1964.23,-862.53 2000.52,-816.48 2023.4,-787.44"/>
+<polygon fill="darkgreen" stroke="darkgreen" points="2029.57,-779.62 2026.91,-790.26 2027.23,-782.59 2023.38,-787.47 2023.38,-787.47 2023.38,-787.47 2027.23,-782.59 2019.84,-784.68 2029.57,-779.62"/>
+<text text-anchor="middle" x="1991.77" y="-856.6" font-family="Times,serif" font-size="14.00">Targets</text>
+</g>
+<!-- deploymentBucket&#45;&gt;deploymentGroup -->
+<g id="edge35" class="edge">
+<title>deploymentBucket-&gt;deploymentGroup</title>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M1090.44,-426.95C1113.42,-413.41 1145.58,-394.46 1170.75,-379.63"/>
+<polygon fill="black" stroke="black" points="1172.23,-382.82 1179.06,-374.73 1168.67,-376.79 1172.23,-382.82"/>
+<text text-anchor="middle" x="1211.24" y="-396.2" font-family="Times,serif" font-size="14.00">Deployment Packages</text>
+</g>
+<!-- application -->
+<g id="node23" class="node">
+<title>application</title>
+<polygon fill="#d8bfd8" stroke="black" points="1152.82,-427.3 1152.82,-463.3 1309.18,-463.3 1309.18,-427.3 1152.82,-427.3"/>
+<text text-anchor="middle" x="1231" y="-441.1" font-family="Times,serif" font-size="14.00">CodeDeploy Application</text>
+</g>
+<!-- application&#45;&gt;deploymentGroup -->
+<g id="edge32" class="edge">
+<title>application-&gt;deploymentGroup</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1226.85,-426.95C1223.95,-414.81 1220,-398.32 1216.66,-384.35"/>
+<polygon fill="blue" stroke="blue" points="1214.42,-375 1221.13,-383.67 1215.3,-378.67 1216.75,-384.72 1216.75,-384.72 1216.75,-384.72 1215.3,-378.67 1212.37,-385.77 1214.42,-375"/>
+<text text-anchor="middle" x="1235.99" y="-396.2" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- deploymentGroup&#45;&gt;asgWeb -->
+<g id="edge33" class="edge">
+<title>deploymentGroup-&gt;asgWeb</title>
+<path fill="none" stroke="black" d="M1309.7,-356.11C1461.42,-356.51 1736.23,-361.51 1769,-392 1848.47,-465.94 1739.43,-545.29 1802,-634 1839.9,-687.73 1907.98,-720.06 1962.29,-738.38"/>
+<polygon fill="black" stroke="black" points="1960.93,-741.61 1971.52,-741.39 1963.1,-734.96 1960.93,-741.61"/>
+<text text-anchor="middle" x="1821.45" y="-553.7" font-family="Times,serif" font-size="14.00">Deploys To</text>
+</g>
+<!-- deploymentGroup&#45;&gt;asgMathWorker -->
+<g id="edge34" class="edge">
+<title>deploymentGroup-&gt;asgMathWorker</title>
+<path fill="none" stroke="black" d="M1309.6,-351.51C1494.49,-345.68 1877.48,-332.21 1937,-319 1965.99,-312.57 1996.85,-300.14 2021,-289.01"/>
+<polygon fill="black" stroke="black" points="2022.33,-292.26 2029.89,-284.83 2019.35,-285.92 2022.33,-292.26"/>
+<text text-anchor="middle" x="2020.47" y="-306.4" font-family="Times,serif" font-size="14.00">Deploys To</text>
+</g>
+<!-- webLaunchTemplate&#45;&gt;webSecurityGroup -->
+<g id="edge3" class="edge">
+<title>webLaunchTemplate-&gt;webSecurityGroup</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1675.51,-652.02C1718.24,-639.7 1778.59,-624.21 1832.78,-617.2 1884.05,-610.57 2247.83,-621.67 2298,-609.2 2320.26,-603.67 2343.21,-592.41 2361.4,-581.95"/>
+<polygon fill="blue" stroke="blue" points="2369.94,-576.88 2363.64,-585.86 2366.69,-578.81 2361.34,-581.99 2361.34,-581.99 2361.34,-581.99 2366.69,-578.81 2359.04,-578.12 2369.94,-576.88"/>
+<text text-anchor="middle" x="1846.39" y="-621.4" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- webLaunchTemplate&#45;&gt;instanceRole -->
+<g id="edge4" class="edge">
+<title>webLaunchTemplate-&gt;instanceRole</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1607.44,-652.22C1595.44,-634.28 1576.51,-606 1562.64,-585.27"/>
+<polygon fill="blue" stroke="blue" points="1557.16,-577.07 1566.46,-582.88 1559.26,-580.22 1562.72,-585.38 1562.72,-585.38 1562.72,-585.38 1559.26,-580.22 1558.98,-587.89 1557.16,-577.07"/>
+<text text-anchor="middle" x="1608.67" y="-621.4" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- webLaunchTemplate&#45;&gt;logGroup -->
+<g id="edge7" class="edge">
+<title>webLaunchTemplate-&gt;logGroup</title>
+<path fill="none" stroke="grey" d="M1551.49,-668.48C1245.09,-663.41 0,-637.96 0,-558.9 0,-558.9 0,-558.9 0,-152.1 0,-116.87 23.78,-83.1 43.61,-61.06"/>
+<polygon fill="grey" stroke="grey" points="50.41,-53.81 46.85,-64.18 47.82,-56.57 43.57,-61.11 43.57,-61.11 43.57,-61.11 47.82,-56.57 40.29,-58.03 50.41,-53.81"/>
+<text text-anchor="middle" x="21.19" y="-351.3" font-family="Times,serif" font-size="14.00">Logs to</text>
+</g>
+<!-- mathWorkerLaunchTemplate&#45;&gt;mathWorkerSecurityGroup -->
+<g id="edge5" class="edge">
+<title>mathWorkerLaunchTemplate-&gt;mathWorkerSecurityGroup</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1848.21,-139.49C1901.6,-131.8 1970.25,-121.41 2031,-110.6 2125.9,-93.72 2233.93,-71.21 2308.07,-55.25"/>
+<polygon fill="blue" stroke="blue" points="2317.57,-53.2 2308.74,-59.71 2313.87,-54 2307.79,-55.31 2307.79,-55.31 2307.79,-55.31 2313.87,-54 2306.85,-50.91 2317.57,-53.2"/>
+<text text-anchor="middle" x="2125.31" y="-98" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- mathWorkerLaunchTemplate&#45;&gt;instanceRole -->
+<g id="edge6" class="edge">
+<title>mathWorkerLaunchTemplate-&gt;instanceRole</title>
+<path fill="none" stroke="blue" stroke-dasharray="5,2" d="M1775.54,-171.42C1786.15,-182.27 1798.92,-197.07 1807,-212.4 1818.22,-233.69 1821,-240.64 1821,-264.7 1821,-446.3 1821,-446.3 1821,-446.3 1821,-480.25 1831.6,-497.99 1807,-521.4 1799.15,-528.87 1785.27,-534.8 1767.87,-539.49"/>
+<polygon fill="blue" stroke="blue" points="1758.42,-541.82 1767.05,-535.06 1762.09,-540.91 1768.12,-539.42 1768.12,-539.42 1768.12,-539.42 1762.09,-540.91 1769.2,-543.79 1758.42,-541.82"/>
+<text text-anchor="middle" x="1834.61" y="-351.3" font-family="Times,serif" font-size="14.00">Uses</text>
+</g>
+<!-- mathWorkerLaunchTemplate&#45;&gt;logGroup -->
+<g id="edge8" class="edge">
+<title>mathWorkerLaunchTemplate-&gt;logGroup</title>
+<path fill="none" stroke="grey" d="M1717.12,-134.7C1700.42,-128.3 1680.61,-121.83 1662,-118.6 1640.72,-114.9 124.9,-122.1 106.61,-110.6 90.09,-100.22 80.82,-80.01 75.75,-63.16"/>
+<polygon fill="grey" stroke="grey" points="73.29,-53.9 80.2,-62.42 74.26,-57.55 75.85,-63.57 75.85,-63.57 75.85,-63.57 74.26,-57.55 71.5,-64.72 73.29,-53.9"/>
+<text text-anchor="middle" x="127.81" y="-98" font-family="Times,serif" font-size="14.00">Logs to</text>
+</g>
+</g>
+</svg>

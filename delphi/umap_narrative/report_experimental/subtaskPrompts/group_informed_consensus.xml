@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<polisAnalysisPrompt version="1.0">
+    <metadata>
+        <title>Guide to Analyzing and Reporting Group-Informed Consensus in Pol.is
+            Conversations</title>
+        <purpose>Generate consistent, evidence-based reports identifying and explaining areas of
+            consensus across different groups</purpose>
+    </metadata>
+
+    <criticalInstructions>
+        <instruction>
+            Generate a JSON response that conforms to the provided schema. DO NOT INCLUDE ANY OTHER
+            TEXT.
+        </instruction>
+        <instruction>
+            DO NOT return ```json at the beginning of the response. This is not markdown. Do not end
+            the response with ```, your response MUST begin with { and end with }
+        </instruction>
+    </criticalInstructions>
+
+    <definitions>
+        <term name="group_informed_consensus">
+            <description>Comments with high agreement across all or most groups, despite differences
+                on other topics</description>
+            <threshold>Variable based on number of groups (0.7 for 2 groups, 0.47 for 3 groups, 0.32
+                for 4 groups, 0.24 for 5+ groups)</threshold>
+            <unit>consensus_score (0-1)</unit>
+        </term>
+        <term name="strong_consensus">
+            <description>Comments with exceptionally high agreement across all groups</description>
+            <threshold>0.8 consensus score</threshold>
+            <unit>consensus_score</unit>
+        </term>
+    </definitions>
+
+    <analysisProcess>
+        <dataProcessing>
+            <step order="1">
+                <n>Identify Comments with Cross-Group Consensus</n>
+                <calculations>
+                    <calculation>group_aware_consensus_score</calculation>
+                    <calculation>agreement_across_groups</calculation>
+                    <calculation>outlier_consensus_items</calculation>
+                </calculations>
+            </step>
+            <step order="2">
+                <n>Analyze Patterns in Consensus Items</n>
+                <calculations>
+                    <calculation>topic_clusters_with_consensus</calculation>
+                    <calculation>linguistic_features_of_consensus</calculation>
+                    <pattern>consensus_patterns</pattern>
+                </calculations>
+            </step>
+            <step order="3">
+                <n>Identify Implications of Consensus Areas</n>
+                <analyses>
+                    <analysis>common_ground_assessment</analysis>
+                    <analysis>shared_value_identification</analysis>
+                    <analysis>consensus_strength_evaluation</analysis>
+                    <pattern>implication_patterns</pattern>
+                </analyses>
+            </step>
+        </dataProcessing>
+
+        <reportingStructure>
+            <paragraph type="consensus_overview">
+                <elements>
+                    <element>level_of_consensus</element>
+                    <element>distribution_of_consensus</element>
+                    <element>key_consensus_areas</element>
+                </elements>
+                <criticalInstructions>
+                    <instruction>
+                        Focus on identifying meaningful patterns of consensus, not just listing
+                        individual comments with high agreement. What themes emerge from points of
+                        agreement?
+                    </instruction>
+                    <instruction>
+                        Consider the significance of consensus in the context of group divisions
+                        elsewhere. Common ground is most meaningful when groups otherwise disagree.
+                    </instruction>
+                    <instruction>
+                        Evaluate the strength and breadth of consensus. Is it widespread or limited
+                        to specific topics?
+                    </instruction>
+                </criticalInstructions>
+                <format>
+                    Analysis of voting patterns revealed [level_of_consensus] across different
+                    participant groups, with [number_of_comments] comments showing strong agreement
+                    that transcended group divisions. These areas of consensus were
+                    [distribution_pattern] across the conversation, [concentration_pattern].
+                    [Additional_high_level_context].
+
+                    The strongest areas of cross-group agreement centered on [primary_consensus_topic],
+                    with several statements receiving consistently high agreement from all groups.
+                    These comments shared common features, including [shared_feature_1] and
+                    [shared_feature_2], suggesting that [interpretation_of_consensus_foundation].
+                    [Additional_insight_if_relevant].
+
+                    Other significant areas of consensus included [secondary_consensus_topic],
+                    particularly statements that [feature_of_consensus_statements]. This pattern
+                    suggests that despite their differences on [divisive_topic], participants from
+                    all groups shared [common_value_or_priority] when considering
+                    [secondary_consensus_topic].
+                </format>
+                <paragraphInstructions>
+                    <instruction>
+                        Provide a comprehensive overview that:
+                        - Quantifies the overall level of cross-group consensus
+                        - Identifies main areas/topics generating consensus
+                        - Analyzes patterns in consensus comments
+                        - Proposes shared values or priorities underlying agreement
+                        - Supports all claims with appropriate citations
+                    </instruction>
+                </paragraphInstructions>
+                <length>3-5 paragraphs</length>
+            </paragraph>
+            <paragraph type="consensus_implications">
+                <elements>
+                    <element>common_ground_assessment</element>
+                    <element>shared_values_identification</element>
+                    <element>bridge_building_opportunities</element>
+                </elements>
+                <criticalInstructions>
+                    <instruction>
+                        Analyze what consensus areas reveal about shared values or priorities across
+                        groups, even when they disagree on other topics.
+                    </instruction>
+                    <instruction>
+                        Consider how consensus areas might serve as bridges between otherwise
+                        divided groups. What starting points for dialogue emerge?
+                    </instruction>
+                    <instruction>
+                        Balance optimism about consensus with realistic assessment of its limits.
+                        Not all consensus indicates deep agreement on underlying values.
+                    </instruction>
+                </criticalInstructions>
+                <format>
+                    The consensus areas identified in this conversation reveal important shared
+                    values across participant groups, despite their differences on other topics.
+                    Most notably, the widespread agreement on [primary_consensus_topic] suggests
+                    that [shared_value_interpretation], even among groups that disagree sharply
+                    on [divisive_topic]. This shared commitment to [common_value] was particularly
+                    evident in [specific_example_with_citation].
+
+                    Another important area of common ground emerged around [secondary_consensus_topic],
+                    where agreement across groups indicated shared [another_common_value]. Despite
+                    differing approaches to [related_divisive_topic], participants from all groups
+                    expressed support for [specific_position], as seen in [another_specific_example].
+                    This suggests that disagreements may stem more from [interpretation_of_disagreement_source]
+                    than from fundamental value differences.
+
+                    These consensus areas potentially offer valuable starting points for bridge-building
+                    between otherwise divided groups. The shared commitment to [key_shared_value]
+                    could serve as foundation for dialogue about more contentious issues like
+                    [divisive_topic], by establishing common ground before addressing points of
+                    disagreement. Similarly, the broad agreement on [practical_consensus_area]
+                    suggests potential for collaborative approaches to [practical_application].
+                </format>
+                <paragraphInstructions>
+                    <instruction>
+                        For each identified pattern of consensus:
+                        - Identify the underlying shared values or priorities
+                        - Connect to broader conversation themes, especially areas of division
+                        - Consider practical implications or applications
+                        - Support all interpretations with specific examples and citations
+                        - Maintain balanced perspective on consensus significance
+                    </instruction>
+                </paragraphInstructions>
+                <length>3-5 paragraphs, depending on extent and complexity of consensus patterns</length>
+            </paragraph>
+        </reportingStructure>
+
+        <citationRules>
+            <template>
+                commentId
+            </template>
+            <rules>
+                <rule>minimum_citations_per_clause>1</rule>
+                <rule>maximum_citations_per_clause>10</rule>
+                <rule>include_full_vote_breakdown>false</rule>
+            </rules>
+        </citationRules>
+
+        <validationRequirements>
+            <dataQuality>
+                <requirement>minimum_votes_per_cited_statement>25</requirement>
+                <requirement>minimum_consensus_score>variable_by_group_count</requirement>
+            </dataQuality>
+
+            <reportingCompleteness>
+                <requirement>multiple_consensus_areas_identified>true</requirement>
+                <requirement>patterns_explained>true</requirement>
+                <requirement>implications_considered>true</requirement>
+            </reportingCompleteness>
+        </validationRequirements>
+
+        <specialCases>
+            <case type="overwhelming_consensus">
+                <threshold>0.9 consensus score</threshold>
+                <handling>
+                    <action>highlight_as_exceptional</action>
+                    <action>analyze_specific_features</action>
+                    <action>consider_relationship_to_wording_and_framing</action>
+                </handling>
+            </case>
+            <case type="unexpected_consensus">
+                <description>Agreement on a statement that seems to contradict a pattern of
+                    division</description>
+                <handling>
+                    <action>flag_anomaly</action>
+                    <action>consider_alternative_interpretations</action>
+                    <action>analyze_wording_carefully</action>
+                </handling>
+            </case>
+        </specialCases>
+
+        <languageGuidelines>
+            <consensusTerms>
+                <term>consensus</term>
+                <term>agreement</term>
+                <term>common ground</term>
+                <term>shared perspective</term>
+                <term>aligned views</term>
+                <term>mutual support</term>
+                <term>collective endorsement</term>
+                <term>broad backing</term>
+                <term>unified position</term>
+            </consensusTerms>
+
+            <styleRules>
+                <rule>avoid_repetitive_structures</rule>
+                <rule>connect_consensus_to_broader_conversation_context</rule>
+                <rule>maintain_neutral_tone</rule>
+                <rule>use_precise_language_for_degrees_of_consensus</rule>
+            </styleRules>
+        </languageGuidelines>
+
+        <qualityChecklist>
+            <check>patterns_properly_identified</check>
+            <check>claims_supported_by_multiple_examples</check>
+            <check>citation_rules_followed</check>
+            <check>shared_values_identified</check>
+            <check>implications_considered</check>
+            <check>balance_maintained</check>
+            <check>language_varied_and_clear</check>
+        </qualityChecklist>
+    </analysisProcess>
+
+    <validationRules>
+        <rule>All claims about consensus must be based on agreement data across groups</rule>
+        <rule>Each claim requires at least one citation</rule>
+        <rule>Citations must use provided format</rule>
+        <rule>Multiple consensus areas must be identified and analyzed</rule>
+    </validationRules>
+
+    <responseFormat>
+        <condensedJSONSchema>
+            {
+            "id": "group_informed_consensus",
+            "title": "Areas of Cross-Group Consensus",
+            "paragraphs": [
+            {
+            "id": "string", // e.g. "consensus_overview"
+            "title": "string",
+            "sentences": [
+            {
+            "clauses": [
+            {
+            "text": "string",
+            "citations": [
+            123
+            ]
+            }
+            ]
+            }
+            ]
+            }
+            ]
+            }
+        </condensedJSONSchema>
+        <typescriptTypesReference>
+            type Citation = {
+            commentId: number;
+            };
+
+            type Clause = {
+            text: string;
+            citations: Citation[];
+            };
+
+            type Sentence = {
+            clauses: Clause[];
+            };
+
+            type Paragraph = {
+            id: string; // e.g. "consensus_overview"
+            title: string;
+            sentences: Sentence[];
+            };
+
+            type Subtask = {
+            id: string;
+            title: string;
+            paragraphs: Paragraph[];
+            };
+        </typescriptTypesReference>
+    </responseFormat>
+    <example>
+        {
+        "id": "group_informed_consensus",
+        "title": "Areas of Cross-Group Consensus",
+        "paragraphs": [
+        {
+        "id": "consensus_overview",
+        "title": "Overview of Cross-Group Consensus",
+        "sentences": [
+        {
+        "clauses": [
+        {
+        "text": "Analysis of voting patterns revealed significant areas of consensus across different participant groups, with 15 comments showing strong agreement that transcended group divisions.",
+        "citations": [12, 15, 23]
+        }
+        ]
+        }
+        ]
+        },
+        {
+        "id": "environmental_protection",
+        "title": "Consensus on Environmental Protection",
+        "sentences": [
+        {
+        "clauses": [
+        {
+        "text": "The strongest area of cross-group agreement centered on environmental protection, with statements supporting conservation efforts receiving high approval from all groups.",
+        "citations": [25, 31, 45]
+        },
+        {
+        "text": "This shared commitment to environmental stewardship transcended otherwise significant divisions on economic policy and regulatory approaches.",
+        "citations": [52, 54, 61]
+        }
+        ]
+        }
+        ]
+        }
+        ]
+        }
+    </example>
+    <data>
+        INSERT_DATA_HERE
+    </data>
+</polisAnalysisPrompt>

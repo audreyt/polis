@@ -1,0 +1,50 @@
+env:
+  browser: true
+  es2021: true
+  jquery: true
+extends:
+  - eslint:recommended
+  - plugin:react/recommended
+globals:
+  _: readonly
+  d3: readonly
+  process: readonly
+ignorePatterns:
+  - build
+  - devel
+  - dist
+overrides:
+  - files:
+    - "*.js"
+    excludedFiles:
+    - "**/*.test.js"
+    - "**/*/*.js"
+    env:
+      node: true
+      browser: false
+  - files:
+    - "**/*.test.js"
+    - "**/*.test.jsx"
+    env:
+      jest: true
+    globals:
+      global: true
+    rules:
+      "@babel/no-unused-expressions": "off"  # Allow unused expressions in tests
+      no-unused-vars: "off"      # Allow unused imports (often needed for mocking)
+      react/display-name: "off"  # Allow anonymous components in mocks
+      react/prop-types: "off"    # Don't require prop-types in test files
+parser: "@babel/eslint-parser"
+parserOptions:
+  ecmaVersion: latest
+  sourceType: module
+  requireConfigFile: false
+  ecmaFeatures:
+    jsx: true
+plugins:
+  - react
+rules:
+  react/prop-types: warn
+settings:
+  react:
+    version: 'detect'

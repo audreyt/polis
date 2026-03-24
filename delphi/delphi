@@ -1,0 +1,24 @@
+#!/bin/bash
+# Delphi Command Line Interface Wrapper
+
+# Get the directory of this script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Path to the Python CLI script and virtual environment
+CLI_SCRIPT="$SCRIPT_DIR/scripts/delphi_cli.py"
+VENV_DIR="$SCRIPT_DIR/delphi-env"
+
+# Check if the virtual environment exists
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Setting up Delphi CLI environment..."
+    python3 -m venv "$VENV_DIR"
+    source "$VENV_DIR/bin/activate"
+    pip install rich boto3
+    deactivate
+    echo "Environment setup complete."
+fi
+
+# Activate the virtual environment and run the script
+source "$VENV_DIR/bin/activate"
+python "$CLI_SCRIPT" "$@"
+deactivate

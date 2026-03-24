@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<polisAnalysisPrompt version="1.0">
+    <metadata>
+        <title>Guide to Analyzing and Reporting Groups in Pol.is Conversations</title>
+        <purpose>Generate consistent, evidence-based reports comparing groups and describing the key
+            differences between them</purpose>
+    </metadata>
+
+    <criticalInstructions>
+        <instruction>
+            Generate a JSON response that conforms to the provided schema. DO NOT INCLUDE ANY OTHER
+            TEXT.
+        </instruction>
+        <instruction>
+            DO NOT return ```json at the beginning of the response. This is not markdown. Do not end
+            the response with ```, your response MUST begin with { and end with }
+        </instruction>
+    </criticalInstructions>
+
+    <definitions>
+        <term name="group_differences">
+            <description>Notable difference in views between groups, especially comments where groups
+                disagreed significantly</description>
+            <threshold>30</threshold>
+            <unit>percent</unit>
+        </term>
+        <term name="extreme_differences">
+            <description>Very large difference in views between groups (typically where one
+                group strongly agrees and another strongly disagrees)</description>
+            <threshold>60</threshold>
+            <unit>percent</unit>
+        </term>
+    </definitions>
+
+    <analysisProcess>
+        <dataProcessing>
+            <step order="1">
+                <n>Identify Key Group Differences</n>
+                <calculations>
+                    <calculation>between_group_differences</calculation>
+                    <calculation>agreement_rate_differences</calculation>
+                    <calculation>most_divisive_statements</calculation>
+                </calculations>
+            </step>
+            <step order="2">
+                <n>Analyze Group Characteristics</n>
+                <calculations>
+                    <calculation>group_positional_clustering</calculation>
+                    <calculation>group_value_inference</calculation>
+                    <pattern>group_distinctive_positions</pattern>
+                </calculations>
+            </step>
+            <step order="3">
+                <n>Synthesize Group Narratives</n>
+                <analyses>
+                    <analysis>core_values_by_group</analysis>
+                    <analysis>key_divisions_explanation</analysis>
+                    <pattern>narrative_tensions</pattern>
+                </analyses>
+            </step>
+        </dataProcessing>
+
+        <reportingStructure>
+            <paragraph type="group_overview">
+                <elements>
+                    <element>number_of_groups</element>
+                    <element>key_divisions</element>
+                    <element>defining_statements</element>
+                </elements>
+                <criticalInstructions>
+                    <instruction>
+                        Focus on the full set of groups, not just pairs of groups. Describe the
+                        constellation of views across all groups.
+                    </instruction>
+                    <instruction>
+                        Use specific statements to illustrate group positions, but do so in service
+                        of showing broader patterns rather than isolated points.
+                    </instruction>
+                    <instruction>
+                        Avoid generic descriptions. Instead, characterize each group by their
+                        distinctive positions and apparent priorities or values.
+                    </instruction>
+                </criticalInstructions>
+                <format>
+                    Analysis of voting patterns revealed [number_of_groups] distinct groups with
+                    different perspectives on key issues. These groups were primarily defined by
+                    their positions on [key_division_theme], particularly regarding [specific_aspect].
+                    [Additional_high_level_context].
+
+                    The most significant divisions between groups emerged around
+                    [major_division_topic], with [description_of_key_disagreement]. This reflected
+                    deeper differences in [values/priorities/concerns], especially in discussions of
+                    [related_subtopic]. [Additional_insight_if_relevant].
+
+                    [If extreme polarization exists] Particularly stark contrasts appeared in
+                    positions on [polarizing_topic], where Groups [X] and [Y] took
+                    [diametrically_opposed_positions] on [specific_statements]. This division
+                    highlighted fundamental differences in [underlying_values_or_frameworks].
+                </format>
+                <paragraphInstructions>
+                    <instruction>
+                        Provide a comprehensive overview that:
+                        - Introduces all identified groups
+                        - Highlights major lines of division
+                        - Connects specific differences to broader themes
+                        - Avoids overemphasizing any single statement or division
+                        - Provides multiple specific examples with appropriate citations
+                    </instruction>
+                </paragraphInstructions>
+                <length>3-5 paragraphs</length>
+            </paragraph>
+            <paragraph type="group_differences">
+                <elements>
+                    <element>group_positions</element>
+                    <element>key_contrasts</element>
+                    <element>defining_values</element>
+                </elements>
+                <criticalInstructions>
+                    <instruction>
+                        For each key division, explain both WHAT groups disagree about AND WHY they
+                        likely disagree (different values, priorities, assumptions, etc.). Avoid
+                        simplistic explanations.
+                    </instruction>
+                    <instruction>
+                        Draw connections between different points of disagreement to reveal patterns
+                        in group thinking, not just isolated differences.
+                    </instruction>
+                    <instruction>
+                        Be precise in characterizing each group's position. Avoid reducing complex
+                        stances to simple agree/disagree dichotomies when more nuanced patterns
+                        exist.
+                    </instruction>
+                </criticalInstructions>
+                <format>
+                    Group [A], comprising approximately [percentage_estimate]% of participants,
+                    demonstrated strong [agreement/disagreement] with statements addressing
+                    [topic_X]. Their voting pattern revealed consistent emphasis on
+                    [value_or_priority], particularly regarding [specific_aspect]. This was most
+                    evident in their [strong/moderate] [agreement/disagreement] with statements
+                    about [specific_subtopic].
+
+                    In contrast, Group [B] prioritized [different_value_or_priority], consistently
+                    supporting positions that [description_of_position]. This group's perspective was
+                    characterized by [distinctive_feature_of_voting_pattern], especially on
+                    statements related to [topic_Y]. Their approach to [shared_topic] differed
+                    fundamentally from Group [A] in terms of [specific_dimension_of_difference].
+
+                    Group [C]'s voting pattern suggested a more [nuanced/moderate/distinctive]
+                    position, frequently [agreeing/disagreeing] with statements about [topic_Z] while
+                    taking a more [qualified/strong/unique] stance on [related_topic]. Their
+                    responses indicated particular concern with [specific_issue], setting them apart
+                    from both Groups [A] and [B].
+
+                    [If more than three groups] The remaining groups showed varying degrees of
+                    alignment on different issues. Group [D] closely resembled Group [A] on matters
+                    of [shared_topic] but diverged regarding [point_of_difference]. Meanwhile,
+                    Group [E] stood out for their distinctive perspective on [unique_topic], taking
+                    positions that didn't clearly align with any other group.
+                </format>
+                <paragraphInstructions>
+                    <instruction>
+                        For each group, provide:
+                        - Clear characterization of their distinctive positions
+                        - Multiple supporting examples with appropriate citations
+                        - Analysis of underlying values or priorities
+                        - Comparison with other groups' positions
+                        - Connections between different position statements to reveal coherent
+                        group perspective
+                    </instruction>
+                </paragraphInstructions>
+                <length>1-2 paragraphs per group</length>
+            </paragraph>
+        </reportingStructure>
+
+        <citationRules>
+            <template>
+                commentId
+            </template>
+            <rules>
+                <rule>minimum_citations_per_clause>1</rule>
+                <rule>maximum_citations_per_clause>10</rule>
+                <rule>include_full_vote_breakdown>false</rule>
+            </rules>
+        </citationRules>
+
+        <validationRequirements>
+            <dataQuality>
+                <requirement>minimum_votes_per_cited_statement>25</requirement>
+            </dataQuality>
+
+            <reportingCompleteness>
+                <requirement>all_groups_represented>true</requirement>
+                <requirement>patterns_explained>true</requirement>
+                <requirement>special_cases_noted>true</requirement>
+            </reportingCompleteness>
+        </validationRequirements>
+
+        <specialCases>
+            <case type="hybrid_group">
+                <description>Group that shares positions with different groups on different
+                    issues</description>
+                <handling>
+                    <action>identify_cross_cutting_positions</action>
+                    <action>explain_unique_combination</action>
+                    <action>avoid_simplistic_classification</action>
+                </handling>
+            </case>
+            <case type="internal_division">
+                <description>Group that is internally divided on specific issues</description>
+                <handling>
+                    <action>note_internal_disagreement</action>
+                    <action>identify_unifying_factors</action>
+                    <action>explain_pattern_significance</action>
+                </handling>
+            </case>
+        </specialCases>
+
+        <languageGuidelines>
+            <groupTerms>
+                <term>perspective</term>
+                <term>position</term>
+                <term>stance</term>
+                <term>view</term>
+                <term>approach</term>
+                <term>priority</term>
+                <term>emphasis</term>
+                <term>value</term>
+                <term>concern</term>
+            </groupTerms>
+
+            <styleRules>
+                <rule>avoid_repetitive_structures</rule>
+                <rule>connect_group_descriptions_to_broader_narrative</rule>
+                <rule>maintain_neutral_tone</rule>
+                <rule>use_precise_language_for_degrees_of_agreement</rule>
+            </styleRules>
+        </languageGuidelines>
+
+        <qualityChecklist>
+            <check>all_groups_covered_comprehensively</check>
+            <check>claims_supported_by_multiple_examples</check>
+            <check>citation_rules_followed</check>
+            <check>patterns_properly_identified</check>
+            <check>special_cases_noted</check>
+            <check>between_group_connections_explained</check>
+            <check>language_varied_and_clear</check>
+        </qualityChecklist>
+    </analysisProcess>
+
+    <validationRules>
+        <rule>All group characterizations must be based on multiple statements from data</rule>
+        <rule>Each claim requires at least one citation</rule>
+        <rule>Citations must use provided format</rule>
+        <rule>Groups must be referenced by actual group identifiers from data</rule>
+    </validationRules>
+
+    <responseFormat>
+        <condensedJSONSchema>
+            {
+            "id": "group_differences",
+            "title": "Group Differences",
+            "paragraphs": [
+            {
+            "id": "string", // e.g. "group_overview"
+            "title": "string",
+            "sentences": [
+            {
+            "clauses": [
+            {
+            "text": "string",
+            "citations": [
+            123
+            ]
+            }
+            ]
+            }
+            ]
+            }
+            ]
+            }
+        </condensedJSONSchema>
+        <typescriptTypesReference>
+            type Citation = {
+            commentId: number;
+            };
+
+            type Clause = {
+            text: string;
+            citations: Citation[];
+            };
+
+            type Sentence = {
+            clauses: Clause[];
+            };
+
+            type Paragraph = {
+            id: string; // e.g. "group_overview"
+            title: string;
+            sentences: Sentence[];
+            };
+
+            type Subtask = {
+            id: string;
+            title: string;
+            paragraphs: Paragraph[];
+            };
+        </typescriptTypesReference>
+    </responseFormat>
+    <example>
+        {
+        "id": "group_differences",
+        "title": "Group Differences",
+        "paragraphs": [
+        {
+        "id": "group_overview",
+        "title": "Overview of Group Differences",
+        "sentences": [
+        {
+        "clauses": [
+        {
+        "text": "Analysis of voting patterns revealed 3 distinct groups with different perspectives on key issues.",
+        "citations": [12, 15, 23]
+        }
+        ]
+        }
+        ]
+        },
+        {
+        "id": "group_a_analysis",
+        "title": "Group A: Economic Prioritizers",
+        "sentences": [
+        {
+        "clauses": [
+        {
+        "text": "Group A consistently prioritized economic considerations in their voting patterns.",
+        "citations": [25, 31, 45]
+        },
+        {
+        "text": "They strongly supported positions focused on financial security and growth.",
+        "citations": [52, 54, 61]
+        }
+        ]
+        }
+        ]
+        },
+        {
+        "id": "group_b_analysis",
+        "title": "Group B: Social Equity Advocates",
+        "sentences": [
+        {
+        "clauses": [
+        {
+        "text": "Group B placed greater emphasis on social equity and fairness in their responses.",
+        "citations": [36, 42, 58]
+        },
+        {
+        "text": "They consistently supported statements addressing inequality and access to resources.",
+        "citations": [63, 71, 75]
+        }
+        ]
+        }
+        ]
+        }
+        ]
+        }
+    </example>
+    <data>
+        INSERT_DATA_HERE
+    </data>
+</polisAnalysisPrompt>

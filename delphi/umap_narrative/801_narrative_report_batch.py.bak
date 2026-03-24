@@ -1,0 +1,818 @@
+#!/usr/bin/env python3
+"""
+Generate batch narrative reports for Polis conversations using Anthropic's Batch API.
+
+This script is an optimized version of 800_report_topic_clusters.py that:
+1. Prepares batch requests for all topics in a conversation
+2. Submits them to Anthropic's Batch API
+3. Stores batch job metadata in DynamoDB
+4. Provides a way to check batch job status
+
+Usage:
+    python 801_narrative_report_batch.py --conversation_id CONVERSATION_ID [--model MODEL] [--no-cache]
+
+Args:
+    --conversation_id: Conversation ID/zid
+    --model: LLM model to use (default: claude-3-5-sonnet-20241022)
+    --no-cache: Ignore cached report data
+    --max-batch-size: Maximum number of topics to include in a single batch (default: 20)
+"""
+
+import os
+import sys
+import json
+import time
+import uuid
+import logging
+import argparse
+import boto3
+import asyncio
+import numpy as np
+import pandas as pd
+from datetime import datetime
+from pathlib import Path
+from typing import List, Dict, Any, Optional, Union, Tuple
+import xml.etree.ElementTree as ET
+from xml.dom.minidom import parseString
+import csv
+import io
+import xmltodict
+from collections import defaultdict
+
+# Import the model provider
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from umap_narrative.llm_factory_constructor import get_model_provider
+from umap_narrative.llm_factory_constructor.model_provider import AnthropicProvider
+
+# Import from local modules
+from polismath_commentgraph.utils.storage import PostgresClient, DynamoDBStorage
+from polismath_commentgraph.utils.group_data import GroupDataProcessor
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+class NarrativeReportService:
+    """Storage service for narrative reports in DynamoDB."""
+
+    def __init__(self, table_name="Delphi_NarrativeReports"):
+        """Initialize the narrative report service.
+
+        Args:
+            table_name: Name of the DynamoDB table to use
+        """
+        # Set up DynamoDB connection
+        self.table_name = table_name
+
+        # Set up DynamoDB client
+        self.dynamodb = boto3.resource(
+            'dynamodb',
+            endpoint_url=os.environ.get('DYNAMODB_ENDPOINT'),
+            region_name=os.environ.get('AWS_DEFAULT_REGION', 'us-west-2'),
+            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID', 'fakeMyKeyId'),
+            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY', 'fakeSecretAccessKey')
+        )
+
+        # Get the table
+        self.table = self.dynamodb.Table(self.table_name)
+
+    def store_report(self, report_id, section, model, report_data, job_id=None):
+        """Store a report in DynamoDB.
+
+        Args:
+            report_id: The report ID
+            section: The section of the report
+            model: The model used to generate the report
+            report_data: The generated report content
+            job_id: The ID of the job that generated this report (optional)
+
+        Returns:
+            Response from DynamoDB
+        """
+        try:
+            # Create a combined key for the report (report_id, section, model)
+            rid_section_model = f"{report_id}_{section}_{model}"
+
+            # Current timestamp
+            timestamp = datetime.now().isoformat()
+
+            # Create item to store
+            item = {
+                'rid_section_model': rid_section_model,
+                'timestamp': timestamp,
+                'report_id': report_id,
+                'section': section,
+                'model': model,
+                'report_data': report_data
+            }
+
+            # Add job_id if provided
+            if job_id:
+                item['job_id'] = job_id
+
+            # Store in DynamoDB
+            response = self.table.put_item(Item=item)
+            logger.info(f"Report stored successfully for {rid_section_model}")
+            return response
+        except Exception as e:
+            logger.error(f"Error storing report: {str(e)}")
+            return None
+
+    def get_report(self, report_id, section, model):
+        """Get a report from DynamoDB.
+
+        Args:
+            report_id: The report ID
+            section: The section of the report
+            model: The model used to generate the report
+
+        Returns:
+            The report data if found, None otherwise
+        """
+        try:
+            # Create the combined key
+            rid_section_model = f"{report_id}_{section}_{model}"
+
+            # Get from DynamoDB
+            response = self.table.get_item(Key={'rid_section_model': rid_section_model})
+
+            # Return the item if found
+            return response.get('Item')
+        except Exception as e:
+            logger.error(f"Error getting report: {str(e)}")
+            return None
+
+class PolisConverter:
+    """Convert between CSV and XML formats for Polis data."""
+    
+    @staticmethod
+    def convert_to_xml(comment_data):
+        """
+        Convert comment data to XML format.
+        
+        Args:
+            comment_data: List of dictionaries with comment data
+            
+        Returns:
+            String with XML representation of the comment data
+        """
+        # Create root element
+        root = ET.Element("polis-comments")
+        
+        # Process each comment
+        for record in comment_data:
+            # Extract base comment data
+            comment = ET.SubElement(root, "comment", {
+                "id": str(record.get("comment-id", "")),
+                "votes": str(record.get("total-votes", 0)),
+                "agrees": str(record.get("total-agrees", 0)),
+                "disagrees": str(record.get("total-disagrees", 0)),
+                "passes": str(record.get("total-passes", 0)),
+            })
+            
+            # Add comment text
+            text = ET.SubElement(comment, "text")
+            text.text = record.get("comment", "")
+            
+            # Process group data
+            group_keys = []
+            for key in record.keys():
+                if key.startswith("group-") and key.count("-") >= 2:
+                    group_id = key.split("-")[1]
+                    if group_id not in group_keys:
+                        group_keys.append(group_id)
+            
+            # Add data for each group
+            for group_id in group_keys:
+                group = ET.SubElement(comment, f"group-{group_id}", {
+                    "votes": str(record.get(f"group-{group_id}-votes", 0)),
+                    "agrees": str(record.get(f"group-{group_id}-agrees", 0)),
+                    "disagrees": str(record.get(f"group-{group_id}-disagrees", 0)),
+                    "passes": str(record.get(f"group-{group_id}-passes", 0)),
+                })
+        
+        # Convert to string with pretty formatting
+        rough_string = ET.tostring(root, 'utf-8')
+        reparsed = parseString(rough_string)
+        return reparsed.toprettyxml(indent="  ")
+
+class BatchReportGenerator:
+    """Generate batch reports for Polis conversations."""
+
+    def __init__(self, conversation_id, model="claude-3-5-sonnet-20241022", no_cache=False, max_batch_size=20, job_id=None):
+        """Initialize the batch report generator.
+
+        Args:
+            conversation_id: ID of the conversation to generate reports for
+            model: Name of the LLM model to use
+            no_cache: Whether to ignore cached report data
+            max_batch_size: Maximum number of topics in a batch
+            job_id: Optional job ID from the job queue system
+        """
+        self.conversation_id = str(conversation_id)
+        self.model = model
+        self.no_cache = no_cache
+        self.max_batch_size = max_batch_size
+        self.job_id = job_id or os.environ.get('DELPHI_JOB_ID')
+        self.report_id = os.environ.get('DELPHI_REPORT_ID')
+
+        # Initialize PostgreSQL client
+        self.postgres_client = PostgresClient()
+
+        # Initialize DynamoDB storage for reports
+        self.report_storage = NarrativeReportService()
+
+        # Initialize group data processor
+        self.group_processor = GroupDataProcessor(self.postgres_client)
+
+        # Set up base path for prompt templates
+        # Get the current script's directory and use it as base for prompt templates
+        current_dir = Path(__file__).parent
+        self.prompt_base_path = current_dir / "report_experimental"
+    
+    async def get_conversation_data(self):
+        """Get conversation data from PostgreSQL and DynamoDB."""
+        try:
+            # Initialize connection
+            self.postgres_client.initialize()
+            
+            # Get conversation metadata
+            conversation = self.postgres_client.get_conversation_by_id(int(self.conversation_id))
+            if not conversation:
+                logger.error(f"Conversation {self.conversation_id} not found in database.")
+                return None
+            
+            # Get comments
+            comments = self.postgres_client.get_comments_by_conversation(int(self.conversation_id))
+            logger.info(f"Retrieved {len(comments)} comments from conversation {self.conversation_id}")
+            
+            # Get processed group and vote data using the group processor
+            export_data = self.group_processor.get_export_data(int(self.conversation_id))
+            logger.info(f"Retrieved processed vote and group data for conversation {self.conversation_id}")
+            
+            # Get math data with group assignments
+            math_data = export_data.get('math_result', {})
+            if math_data and math_data.get('group_assignments'):
+                logger.info(f"Retrieved math data with {len(math_data.get('group_assignments', {}))} group assignments")
+            else:
+                logger.warning(f"No group assignments found in math data")
+            
+            # Use the processed comments from the export data
+            processed_comments = export_data.get('comments', [])
+            
+            # Load cluster assignments from DynamoDB
+            cluster_map = self.load_comment_clusters_from_dynamodb(self.conversation_id)
+            
+            # Enrich comments with cluster assignments
+            enriched_count = 0
+            for comment in processed_comments:
+                comment_id = str(comment.get('comment_id', ''))
+                if comment_id in cluster_map:
+                    comment['layer0_cluster_id'] = cluster_map[comment_id]
+                    enriched_count += 1
+            
+            # Log cluster assignment results
+            if enriched_count > 0:
+                logger.info(f"Enriched {enriched_count} comments with cluster assignments from DynamoDB")
+            else:
+                logger.warning("No comments could be enriched with cluster assignments")
+            
+            return {
+                "conversation": conversation,
+                "comments": comments,
+                "processed_comments": processed_comments,
+                "math_data": math_data
+            }
+        except Exception as e:
+            logger.error(f"Error getting conversation data: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return None
+        finally:
+            # Clean up connection
+            self.postgres_client.shutdown()
+    
+    def load_comment_clusters_from_dynamodb(self, conversation_id):
+        """
+        Load cluster assignments for comments from DynamoDB.
+        
+        Args:
+            conversation_id: Conversation ID to retrieve clusters for
+            
+        Returns:
+            Dictionary mapping comment IDs to their cluster assignments
+        """
+        try:
+            # Initialize DynamoDB connection
+            dynamodb = boto3.resource(
+                'dynamodb',
+                endpoint_url=os.environ.get('DYNAMODB_ENDPOINT', 'http://host.docker.internal:8000'),
+                region_name=os.environ.get('AWS_REGION', 'us-west-2'),
+                aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID', 'fakeMyKeyId'),
+                aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY', 'fakeSecretAccessKey')
+            )
+            
+            # Connect to comment clusters table
+            clusters_table = dynamodb.Table('Delphi_CommentHierarchicalClusterAssignments')
+            
+            # Use scan with filter instead of query for compatibility with all DynamoDB setups
+            # This is less efficient but more compatible
+            response = clusters_table.scan(
+                FilterExpression=boto3.dynamodb.conditions.Attr('conversation_id').eq(str(conversation_id)),
+                Limit=1000  # Process in batches
+            )
+            
+            # Create mapping of comment IDs to cluster IDs
+            cluster_map = {}
+            for item in response.get('Items', []):
+                comment_id = item.get('comment_id')
+                layer0_cluster_id = item.get('layer0_cluster_id')
+                if comment_id is not None and layer0_cluster_id is not None:
+                    cluster_map[str(comment_id)] = layer0_cluster_id
+                    
+            # Handle pagination if needed
+            while 'LastEvaluatedKey' in response:
+                response = clusters_table.scan(
+                    FilterExpression=boto3.dynamodb.conditions.Attr('conversation_id').eq(str(conversation_id)),
+                    ExclusiveStartKey=response['LastEvaluatedKey'],
+                    Limit=1000
+                )
+                for item in response.get('Items', []):
+                    comment_id = item.get('comment_id')
+                    layer0_cluster_id = item.get('layer0_cluster_id')
+                    if comment_id is not None and layer0_cluster_id is not None:
+                        cluster_map[str(comment_id)] = layer0_cluster_id
+            
+            logger.info(f"Loaded {len(cluster_map)} cluster assignments from DynamoDB")
+            return cluster_map
+        except Exception as e:
+            logger.error(f"Error loading cluster assignments from DynamoDB: {e}")
+            return {}
+    
+    async def get_topics(self):
+        """Get topics for the conversation from DynamoDB."""
+        # Get topics from ClusterTopics table
+        dynamo_storage = DynamoDBStorage(
+            endpoint_url=os.environ.get('DYNAMODB_ENDPOINT')
+        )
+        
+        # Get topic data from DynamoDB
+        topics = []
+        
+        try:
+            # Get all LLMTopicNames entries for layer 0
+            table = dynamo_storage.dynamodb.Table('Delphi_CommentClustersLLMTopicNames')
+            response = table.scan(
+                FilterExpression=boto3.dynamodb.conditions.Attr('conversation_id').eq(self.conversation_id) &
+                               boto3.dynamodb.conditions.Attr('layer_id').eq(0)
+            )
+            
+            topic_names_items = response.get('Items', [])
+            logger.info(f"Found {len(topic_names_items)} layer 0 topic names in LLMTopicNames")
+            
+            # Get all comment clusters
+            clusters_table = dynamo_storage.dynamodb.Table('Delphi_CommentHierarchicalClusterAssignments')
+            response = clusters_table.scan(
+                FilterExpression=boto3.dynamodb.conditions.Attr('conversation_id').eq(self.conversation_id)
+            )
+            
+            clusters = response.get('Items', [])
+            logger.info(f"Found {len(clusters)} comment cluster entries")
+            
+            # Process clusters to get comment IDs for each topic
+            topic_comments = defaultdict(list)
+            for item in clusters:
+                # Look at layer0 clusters
+                if 'layer0_cluster_id' in item:
+                    cluster_id = item['layer0_cluster_id']
+                    comment_id = item.get('comment_id')
+                    if comment_id:
+                        topic_comments[cluster_id].append(int(comment_id))
+            
+            logger.info(f"Collected comments for {len(topic_comments)} clusters")
+            
+            # Create topics data structure
+            for topic_item in topic_names_items:
+                cluster_id = topic_item.get('cluster_id')
+                topic_name = topic_item.get('topic_name', f"Topic {cluster_id}")
+                
+                logger.info(f"Processing topic for cluster {cluster_id}: {topic_name}")
+                
+                if cluster_id is not None:
+                    # Try to get sample comments for this topic
+                    sample_comments = []
+                    cluster_response = dynamo_storage.dynamodb.Table('Delphi_CommentClustersStructureKeywords').query(
+                        KeyConditionExpression=boto3.dynamodb.conditions.Key('conversation_id').eq(self.conversation_id) &
+                                             boto3.dynamodb.conditions.Key('cluster_key').eq(f'layer0_{cluster_id}')
+                    )
+                    
+                    if cluster_response.get('Items'):
+                        cluster_item = cluster_response.get('Items')[0]
+                        if 'sample_comments' in cluster_item:
+                            if isinstance(cluster_item['sample_comments'], list):
+                                sample_comments = cluster_item['sample_comments']
+                            elif isinstance(cluster_item['sample_comments'], dict) and 'L' in cluster_item['sample_comments']:
+                                for comment in cluster_item['sample_comments']['L']:
+                                    if 'S' in comment:
+                                        sample_comments.append(comment['S'])
+                    
+                    # Create topic entry
+                    topic = {
+                        "cluster_id": cluster_id,
+                        "name": topic_name,
+                        "citations": topic_comments.get(cluster_id, []),
+                        "sample_comments": sample_comments
+                    }
+                    topics.append(topic)
+            
+            logger.info(f"Created {len(topics)} topics for conversation {self.conversation_id}")
+            
+            # Sort topics by number of citations (descending)
+            topics.sort(key=lambda x: len(x['citations']), reverse=True)
+            
+            return topics
+        
+        except Exception as e:
+            logger.error(f"Error getting topics: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return []
+    
+    def filter_topics(self, comment, topic_cluster_id=None, topic_citations=None, sample_comments=None):
+        """Filter for comments that are part of a specific topic."""
+        # Get comment ID
+        comment_id = comment.get('comment_id')
+        if not comment_id:
+            return False
+        
+        # Check if we have a specific cluster ID to filter by
+        if topic_cluster_id is not None:
+            layer0_cluster_id = comment.get('layer0_cluster_id')
+            if layer0_cluster_id is not None:
+                # Simple string comparison is more reliable across different numeric types
+                if str(layer0_cluster_id) == str(topic_cluster_id):
+                    return True
+                
+        # Check if this comment ID is in our topic citations
+        if topic_citations and str(comment_id) in [str(c) for c in topic_citations]:
+            return True
+            
+        # If we have sample comments and not enough filtered comments,
+        # try to match based on text similarity
+        if sample_comments and len(sample_comments) > 0:
+            comment_text = comment.get('comment', '')
+            if not comment_text:
+                return False
+                
+            # Check if this comment text matches any sample comment
+            for sample in sample_comments:
+                # Skip non-string samples
+                if not isinstance(sample, str) or not sample:
+                    continue
+                    
+                # Simple substring match rather than complex word comparison
+                if sample.lower() in comment_text.lower() or comment_text.lower() in sample.lower():
+                    return True
+        
+        return False
+    
+    async def get_comments_as_xml(self, filter_func=None, filter_args=None):
+        """Get comments as XML, optionally filtered."""
+        try:
+            # Get conversation data
+            data = await self.get_conversation_data()
+            
+            if not data:
+                logger.error("Failed to get conversation data.")
+                return ""
+            
+            # Apply filter if provided
+            filtered_comments = data["processed_comments"]
+            
+            if filter_func:
+                if filter_args:
+                    filtered_comments = [c for c in filtered_comments if filter_func(c, **filter_args)]
+                else:
+                    filtered_comments = [c for c in filtered_comments if filter_func(c)]
+            
+            # Limit the number of comments for topic reports to avoid "Too many comments" error
+            if filter_func == self.filter_topics and len(filtered_comments) > 100:
+                logger.info(f"Limiting topic comments from {len(filtered_comments)} to 100")
+                # Sort by votes to include the most significant comments - use safer access for votes
+                filtered_comments.sort(key=lambda c: int(c.get('votes', 0)) if isinstance(c.get('votes'), (int, float)) else 0, reverse=True)
+                filtered_comments = filtered_comments[:100]
+            
+            # Convert to XML
+            xml = PolisConverter.convert_to_xml(filtered_comments)
+            
+            return xml
+        except Exception as e:
+            logger.error(f"Error in get_comments_as_xml: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return ""
+    
+    async def prepare_batch_requests(self):
+        """Prepare batch requests for all topics."""
+        # Get topics
+        topics = await self.get_topics()
+        
+        if not topics:
+            logger.warning("No topics found")
+            return []
+        
+        logger.info(f"Preparing batch requests for {len(topics)} topics")
+        
+        # Read system lore
+        system_path = self.prompt_base_path / 'system.xml'
+        if not system_path.exists():
+            logger.error(f"System file not found: {system_path}")
+            return []
+        
+        with open(system_path, 'r') as f:
+            system_lore = f.read()
+        
+        # Read template file for topics
+        template_path = self.prompt_base_path / "subtaskPrompts/topics.xml"
+        if not template_path.exists():
+            logger.error(f"Template file not found: {template_path}")
+            return []
+        
+        with open(template_path, 'r') as f:
+            template_content = f.read()
+        
+        # Initialize list for batch requests
+        batch_requests = []
+        
+        # For each topic, prepare a prompt and add it to the batch
+        for topic in topics:
+            topic_name = topic['name']
+            topic_cluster_id = topic['cluster_id']
+            topic_key = topic_name.lower().replace(' ', '_')
+            section_name = f"topic_{topic_key}"
+            
+            # Create filter for this topic
+            filter_args = {
+                'topic_cluster_id': topic_cluster_id,
+                'topic_citations': topic.get('citations', []),
+                'sample_comments': topic.get('sample_comments', [])
+            }
+            
+            # Get comments as XML
+            structured_comments = await self.get_comments_as_xml(self.filter_topics, filter_args)
+            
+            # Skip if no structured comments
+            if not structured_comments.strip():
+                logger.warning(f"No content after filter for topic {topic_name}")
+                continue
+            
+            # Insert structured comments into template
+            try:
+                template_dict = xmltodict.parse(template_content)
+                
+                # Find the data element and replace its content
+                template_dict['polisAnalysisPrompt']['data'] = {"content": {"structured_comments": structured_comments}}
+                
+                # Add topic name to prompt
+                if 'context' in template_dict['polisAnalysisPrompt']:
+                    if isinstance(template_dict['polisAnalysisPrompt']['context'], dict):
+                        template_dict['polisAnalysisPrompt']['context']['topic_name'] = topic_name
+                
+                # Convert back to XML
+                prompt_xml = xmltodict.unparse(template_dict, pretty=True)
+                
+                # Add model prompt formatting
+                model_prompt = f"""
+                    {prompt_xml}
+
+                    You MUST respond with a JSON object that follows this EXACT structure for topic analysis. 
+                    IMPORTANT: Do NOT simply repeat the comments verbatim. Instead, analyze the underlying themes, values,
+                    and perspectives reflected in the comments. Identify patterns in how different groups view the topic.
+
+                    ```json
+                    {{
+                      "id": "topic_overview_and_consensus",
+                      "title": "Overview of Topic and Consensus",
+                      "paragraphs": [
+                        {{
+                          "id": "topic_overview",
+                          "title": "Overview of Topic",
+                          "sentences": [
+                            {{
+                              "clauses": [
+                                {{
+                                  "text": "This topic reveals patterns of participant views on economic development, community identity, and resource priorities.",
+                                  "citations": [190, 191, 1142]
+                                }},
+                                {{
+                                  "text": "Analysis of what the comments reveal about underlying values and priorities in the community.",
+                                  "citations": [1245, 1256]
+                                }}
+                              ]
+                            }}
+                          ]
+                        }},
+                        {{
+                          "id": "topic_by_groups",
+                          "title": "Group Perspectives on Topic",
+                          "sentences": [
+                            {{
+                              "clauses": [
+                                {{
+                                  "text": "Comparison of how different groups approached this topic, with analysis of the values that drive their different perspectives.",
+                                  "citations": [190, 191]
+                                }}
+                              ]
+                            }}
+                          ]
+                        }}
+                      ]
+                    }}
+                    ```
+
+                    Make sure the JSON is VALID, as defined at https://www.json.org/json-en.html:
+                    - Begin with object '{{' and end with '}}'
+                    - All keys MUST be enclosed in double quotes
+                    - NO trailing commas should be included after the last element in any array or object
+                    - Do NOT include any additional text outside of the JSON object
+                    - Do not provide explanations, only the JSON
+                    - Use the exact structure shown above with "id", "title", "paragraphs", etc.
+                    - Include relevant citations to comment IDs in the data
+                """
+                
+                # Add to batch requests
+                batch_request = {
+                    "system": system_lore,
+                    "messages": [
+                        {"role": "user", "content": model_prompt}
+                    ],
+                    "max_tokens": 4000,
+                    "metadata": {
+                        "topic_name": topic_name,
+                        "topic_key": topic_key,
+                        "cluster_id": topic_cluster_id,
+                        "section_name": section_name,
+                        "conversation_id": self.conversation_id
+                    }
+                }
+                
+                batch_requests.append(batch_request)
+                
+            except Exception as e:
+                logger.error(f"Error preparing prompt for topic {topic_name}: {str(e)}")
+                import traceback
+                logger.error(traceback.format_exc())
+                continue
+        
+        logger.info(f"Prepared {len(batch_requests)} batch requests")
+        return batch_requests
+    
+    async def process_request(self, request):
+        """Process a single topic report request."""
+        try:
+            # Extract metadata
+            metadata = request.get('metadata', {})
+            topic_name = metadata.get('topic_name', 'Unknown Topic')
+            section_name = metadata.get('section_name', f"topic_{topic_name.lower().replace(' ', '_')}")
+
+            logger.info(f"Processing request for topic: {topic_name}")
+
+            # Create Anthropic provider
+            anthropic_provider = get_model_provider("anthropic", self.model)
+
+            # Get response from LLM
+            response = await anthropic_provider.get_completion(
+                system=request.get('system', ''),
+                prompt=request.get('messages', [])[0].get('content', ''),
+                max_tokens=request.get('max_tokens', 4000)
+            )
+
+            # Store the result in NarrativeReports table
+            if self.report_id:
+                self.report_storage.store_report(
+                    report_id=self.report_id,
+                    section=section_name,
+                    model=self.model,
+                    report_data=response.get('content', '{}'),
+                    job_id=self.job_id
+                )
+                logger.info(f"Stored report for section {section_name}")
+            else:
+                logger.warning(f"No report_id available, skipping storage for {section_name}")
+
+            return {
+                'topic_name': topic_name,
+                'section_name': section_name,
+                'response': response
+            }
+        except Exception as e:
+            logger.error(f"Error processing request for topic {request.get('metadata', {}).get('topic_name', 'unknown')}: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return None
+
+    async def submit_batch(self):
+        """Prepare and process a batch of topic report requests."""
+        # Prepare batch requests
+        batch_requests = await self.prepare_batch_requests()
+
+        if not batch_requests:
+            logger.error("No batch requests to submit")
+            return None
+
+        # Log job information
+        logger.info(f"Processing batch of {len(batch_requests)} requests for conversation {self.conversation_id}")
+        if self.job_id:
+            logger.info(f"Job ID: {self.job_id}")
+        if self.report_id:
+            logger.info(f"Report ID: {self.report_id}")
+
+        # Limit batch size if needed
+        if len(batch_requests) > self.max_batch_size:
+            logger.info(f"Limiting batch size from {len(batch_requests)} to {self.max_batch_size}")
+            batch_requests = batch_requests[:self.max_batch_size]
+
+        # Process requests sequentially
+        results = []
+        for i, request in enumerate(batch_requests):
+            logger.info(f"Processing request {i+1}/{len(batch_requests)}")
+            result = await self.process_request(request)
+            if result:
+                results.append(result)
+            # Add a small delay between requests to avoid rate limiting
+            await asyncio.sleep(1)
+
+        logger.info(f"Processed {len(results)}/{len(batch_requests)} requests successfully")
+
+        return self.job_id
+
+async def main():
+    """Main entry point."""
+    parser = argparse.ArgumentParser(description='Generate narrative reports for Polis conversations')
+    parser.add_argument('--conversation_id', '--zid', type=str, required=True,
+                        help='Conversation ID to process')
+    parser.add_argument('--model', type=str, default='claude-3-5-sonnet-20241022',
+                        help='LLM model to use (default: claude-3-5-sonnet-20241022)')
+    parser.add_argument('--no-cache', action='store_true',
+                        help='Ignore cached report data')
+    parser.add_argument('--max-batch-size', type=int, default=20,
+                        help='Maximum number of topics to include in a single batch (default: 20)')
+    args = parser.parse_args()
+
+    # Get environment variables for job
+    job_id = os.environ.get('DELPHI_JOB_ID')
+    report_id = os.environ.get('DELPHI_REPORT_ID')
+
+    # Set up environment variables for database connections
+    os.environ.setdefault('DATABASE_HOST', 'host.docker.internal')
+    os.environ.setdefault('DATABASE_PORT', '5432')
+    os.environ.setdefault('DATABASE_NAME', 'polisDB_prod_local_mar14')
+    os.environ.setdefault('DATABASE_USER', 'postgres')
+    os.environ.setdefault('DATABASE_PASSWORD', '')
+
+    # Print database connection info
+    logger.info(f"Database connection info:")
+    logger.info(f"- HOST: {os.environ.get('DATABASE_HOST')}")
+    logger.info(f"- PORT: {os.environ.get('DATABASE_PORT')}")
+    logger.info(f"- DATABASE: {os.environ.get('DATABASE_NAME')}")
+    logger.info(f"- USER: {os.environ.get('DATABASE_USER')}")
+
+    # Print execution summary
+    logger.info(f"Running narrative report generator with the following settings:")
+    logger.info(f"- Conversation ID: {args.conversation_id}")
+    logger.info(f"- Model: {args.model}")
+    logger.info(f"- Cache: {'disabled' if args.no_cache else 'enabled'}")
+    logger.info(f"- Max batch size: {args.max_batch_size}")
+    if job_id:
+        logger.info(f"- Job ID: {job_id}")
+    if report_id:
+        logger.info(f"- Report ID: {report_id}")
+
+    # Create batch report generator
+    generator = BatchReportGenerator(
+        conversation_id=args.conversation_id,
+        model=args.model,
+        no_cache=args.no_cache,
+        max_batch_size=args.max_batch_size,
+        job_id=job_id
+    )
+
+    # Process reports
+    result = await generator.submit_batch()
+
+    if result:
+        logger.info(f"Narrative reports generated successfully")
+        print(f"Narrative reports generated successfully")
+        if job_id:
+            print(f"Job ID: {job_id}")
+        if report_id:
+            print(f"Reports stored for report_id: {report_id}")
+    else:
+        logger.error(f"Failed to generate narrative reports")
+        print(f"Failed to generate narrative reports. See logs for details.")
+        # Exit with error code
+        sys.exit(1)
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

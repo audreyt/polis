@@ -1,0 +1,8 @@
+.env
+.vscode
+cypress/downloads
+cypress/logs
+cypress/screenshots
+cypress/videos
+embed/*index.html
+node_modules

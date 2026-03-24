@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<polisAnalysisPrompt version="1.0">
+    <metadata>
+        <title>Guide to Analyzing and Reporting Uncertainty in Pol.is Conversations</title>
+        <purpose>Generate consistent, evidence-based reports identifying and explaining areas of
+            uncertainty in voter responses</purpose>
+    </metadata>
+
+    <criticalInstructions>
+        <instruction>
+            Generate a JSON response that conforms to the provided schema. DO NOT INCLUDE ANY OTHER
+            TEXT.
+        </instruction>
+        <instruction>
+            DO NOT return ```json at the beginning of the response. This is not markdown. Do not end
+            the response with ```, your response MUST begin with { and end with }
+        </instruction>
+    </criticalInstructions>
+
+    <definitions>
+        <term name="uncertainty">
+            <description>Comments with high pass rates (participants choose "pass" instead of
+                agree/disagree)</description>
+            <threshold>20</threshold>
+            <unit>percent</unit>
+        </term>
+        <term name="high_uncertainty">
+            <description>Comments with very high pass rates, suggesting significant voter
+                hesitation or confusion</description>
+            <threshold>35</threshold>
+            <unit>percent</unit>
+        </term>
+    </definitions>
+
+    <analysisProcess>
+        <dataProcessing>
+            <step order="1">
+                <n>Identify Comments with High Pass Rates</n>
+                <calculations>
+                    <calculation>pass_rate_by_comment</calculation>
+                    <calculation>pass_rate_distribution</calculation>
+                    <calculation>outlier_pass_rates</calculation>
+                </calculations>
+            </step>
+            <step order="2">
+                <n>Analyze Patterns in Uncertain Comments</n>
+                <calculations>
+                    <calculation>topic_clusters_with_uncertainty</calculation>
+                    <calculation>linguistic_features_of_uncertainty</calculation>
+                    <pattern>uncertainty_patterns</pattern>
+                </calculations>
+            </step>
+            <step order="3">
+                <n>Identify Potential Causes of Uncertainty</n>
+                <analyses>
+                    <analysis>ambiguity_analysis</analysis>
+                    <analysis>complexity_assessment</analysis>
+                    <analysis>divisiveness_correlation</analysis>
+                    <pattern>cause_patterns</pattern>
+                </analyses>
+            </step>
+        </dataProcessing>
+
+        <reportingStructure>
+            <paragraph type="uncertainty_overview">
+                <elements>
+                    <element>level_of_uncertainty</element>
+                    <element>distribution_of_uncertainty</element>
+                    <element>key_uncertain_areas</element>
+                </elements>
+                <criticalInstructions>
+                    <instruction>
+                        Focus on patterns of uncertainty, not just individual comments with high pass
+                        rates. Identify themes among uncertain comments.
+                    </instruction>
+                    <instruction>
+                        Analyze what makes certain comments generate uncertainty - clarity issues,
+                        complexity, divisiveness, etc.
+                    </instruction>
+                    <instruction>
+                        Compare overall uncertainty to typical Pol.is conversations (if data is
+                        available) for context.
+                    </instruction>
+                </criticalInstructions>
+                <format>
+                    Analysis of voting patterns revealed [level_of_uncertainty] within this
+                    conversation, with approximately [percentage_range]% of comments receiving pass
+                    rates above the 20% threshold for notable uncertainty. These uncertain responses
+                    were [distribution_pattern] across the conversation, [concentration_pattern].
+                    [Additional_high_level_context].
+
+                    The highest levels of uncertainty appeared in comments addressing
+                    [topic_with_highest_uncertainty], with several statements reaching pass rates of
+                    [specific_high_percentage]% or more. These comments shared common features,
+                    including [shared_feature_1] and [shared_feature_2], suggesting that
+                    [interpretation_of_uncertainty_cause]. [Additional_insight_if_relevant].
+
+                    Other significant areas of uncertainty included discussions of
+                    [secondary_uncertain_topic], particularly statements that [feature_of_uncertain_statements].
+                    This pattern suggests that participants were [hesitant/unclear/divided] about
+                    these topics, potentially due to [proposed_reason_for_uncertainty].
+                </format>
+                <paragraphInstructions>
+                    <instruction>
+                        Provide a comprehensive overview that:
+                        - Quantifies the overall level of uncertainty
+                        - Identifies main areas/topics generating uncertainty
+                        - Analyzes patterns in uncertain comments
+                        - Proposes potential reasons for observed uncertainty
+                        - Supports all claims with appropriate citations
+                    </instruction>
+                </paragraphInstructions>
+                <length>3-5 paragraphs</length>
+            </paragraph>
+            <paragraph type="uncertainty_analysis">
+                <elements>
+                    <element>ambiguity_assessment</element>
+                    <element>complexity_analysis</element>
+                    <element>divisiveness_review</element>
+                </elements>
+                <criticalInstructions>
+                    <instruction>
+                        For comments with high uncertainty, analyze specific features that might
+                        cause hesitation - ambiguous language, complex concepts, contentious topics,
+                        etc.
+                    </instruction>
+                    <instruction>
+                        Consider group-specific patterns of uncertainty - do certain groups show more
+                        hesitation on particular topics?
+                    </instruction>
+                    <instruction>
+                        Differentiate between different causes of uncertainty rather than assuming
+                        a single explanation for all high-pass comments.
+                    </instruction>
+                </criticalInstructions>
+                <format>
+                    Closer examination revealed several distinct causes of uncertainty in this
+                    conversation. One significant factor was [primary_cause_of_uncertainty],
+                    particularly evident in comments about [specific_topic]. These statements often
+                    [feature_of_uncertain_comments], leading participants to [reason_for_passing].
+                    This pattern was especially pronounced in [specific_example_with_citation].
+
+                    A second factor contributing to uncertainty was [secondary_cause_of_uncertainty],
+                    which affected comments addressing [another_topic]. These comments typically
+                    [different_feature_of_uncertain_comments], creating a situation where
+                    participants may have [another_reason_for_passing]. For example,
+                    [specific_example_with_citation] demonstrated this pattern clearly.
+
+                    [If group differences exist] Notably, uncertainty patterns varied across
+                    participant groups. Group [X] showed markedly [higher/lower] pass rates on
+                    statements about [topic_with_group_difference], suggesting that
+                    [interpretation_of_group_difference]. Meanwhile, Group [Y] demonstrated unique
+                    uncertainty regarding [group_specific_uncertainty_topic], potentially indicating
+                    [interpretation_of_group_specific_pattern].
+
+                    [If relevant] The relationship between uncertainty and agreement/disagreement
+                    revealed that [pattern_between_uncertainty_and_polarization]. Comments
+                    generating both high uncertainty and significant disagreement often addressed
+                    [contentious_uncertain_topics], suggesting that participant hesitation stemmed
+                    from [interpretation_of_contentious_uncertainty].
+                </format>
+                <paragraphInstructions>
+                    <instruction>
+                        For each identified pattern of uncertainty:
+                        - Provide specific examples with appropriate citations
+                        - Analyze the linguistic or conceptual features causing hesitation
+                        - Consider group-specific patterns where relevant
+                        - Connect to broader conversation themes
+                        - Offer evidence-based interpretations of underlying causes
+                    </instruction>
+                </paragraphInstructions>
+                <length>3-6 paragraphs, depending on complexity of uncertainty patterns</length>
+            </paragraph>
+        </reportingStructure>
+
+        <citationRules>
+            <template>
+                commentId
+            </template>
+            <rules>
+                <rule>minimum_citations_per_clause>1</rule>
+                <rule>maximum_citations_per_clause>10</rule>
+                <rule>include_full_vote_breakdown>false</rule>
+            </rules>
+        </citationRules>
+
+        <validationRequirements>
+            <dataQuality>
+                <requirement>minimum_votes_per_cited_statement>25</requirement>
+                <requirement>minimum_pass_rate>15</requirement>
+            </dataQuality>
+
+            <reportingCompleteness>
+                <requirement>multiple_causes_considered>true</requirement>
+                <requirement>patterns_explained>true</requirement>
+                <requirement>special_cases_noted>true</requirement>
+            </reportingCompleteness>
+        </validationRequirements>
+
+        <specialCases>
+            <case type="extremely_high_uncertainty">
+                <threshold>50</threshold>
+                <handling>
+                    <action>highlight_as_exceptional</action>
+                    <action>analyze_specific_causes</action>
+                    <action>consider_relationship_to_topic_and_wording</action>
+                </handling>
+            </case>
+            <case type="group_specific_uncertainty">
+                <description>When one group shows much higher uncertainty than others on specific
+                    topics</description>
+                <handling>
+                    <action>flag_pattern</action>
+                    <action>relate_to_group_characteristics</action>
+                    <action>consider_information_asymmetry</action>
+                </handling>
+            </case>
+        </specialCases>
+
+        <languageGuidelines>
+            <uncertaintyTerms>
+                <term>uncertainty</term>
+                <term>hesitation</term>
+                <term>ambiguity</term>
+                <term>complexity</term>
+                <term>nuance</term>
+                <term>indecision</term>
+                <term>lack of clarity</term>
+                <term>mixed feelings</term>
+                <term>caution</term>
+            </uncertaintyTerms>
+
+            <styleRules>
+                <rule>avoid_repetitive_structures</rule>
+                <rule>connect_uncertainty_to_broader_conversation_context</rule>
+                <rule>maintain_neutral_tone</rule>
+                <rule>use_precise_language_for_degrees_of_uncertainty</rule>
+            </styleRules>
+        </languageGuidelines>
+
+        <qualityChecklist>
+            <check>patterns_properly_identified</check>
+            <check>claims_supported_by_multiple_examples</check>
+            <check>citation_rules_followed</check>
+            <check>multiple_causes_considered</check>
+            <check>special_cases_noted</check>
+            <check>group_patterns_analyzed_where_relevant</check>
+            <check>language_varied_and_clear</check>
+        </qualityChecklist>
+    </analysisProcess>
+
+    <validationRules>
+        <rule>All claims about uncertainty must be based on pass rate data</rule>
+        <rule>Each claim requires at least one citation</rule>
+        <rule>Citations must use provided format</rule>
+        <rule>Multiple causes of uncertainty must be considered</rule>
+    </validationRules>
+
+    <responseFormat>
+        <condensedJSONSchema>
+            {
+            "id": "uncertainty_patterns",
+            "title": "Patterns of Uncertainty",
+            "paragraphs": [
+            {
+            "id": "string", // e.g. "uncertainty_overview"
+            "title": "string",
+            "sentences": [
+            {
+            "clauses": [
+            {
+            "text": "string",
+            "citations": [
+            123
+            ]
+            }
+            ]
+            }
+            ]
+            }
+            ]
+            }
+        </condensedJSONSchema>
+        <typescriptTypesReference>
+            type Citation = {
+            commentId: number;
+            };
+
+            type Clause = {
+            text: string;
+            citations: Citation[];
+            };
+
+            type Sentence = {
+            clauses: Clause[];
+            };
+
+            type Paragraph = {
+            id: string; // e.g. "uncertainty_overview"
+            title: string;
+            sentences: Sentence[];
+            };
+
+            type Subtask = {
+            id: string;
+            title: string;
+            paragraphs: Paragraph[];
+            };
+        </typescriptTypesReference>
+    </responseFormat>
+    <example>
+        {
+        "id": "uncertainty_patterns",
+        "title": "Patterns of Uncertainty",
+        "paragraphs": [
+        {
+        "id": "uncertainty_overview",
+        "title": "Overview of Uncertainty",
+        "sentences": [
+        {
+        "clauses": [
+        {
+        "text": "Analysis of voting patterns revealed moderate levels of uncertainty within this conversation, with approximately 25-30% of comments receiving pass rates above the 20% threshold for notable uncertainty.",
+        "citations": [12, 15, 23]
+        }
+        ]
+        }
+        ]
+        },
+        {
+        "id": "linguistic_ambiguity",
+        "title": "Linguistic Ambiguity",
+        "sentences": [
+        {
+        "clauses": [
+        {
+        "text": "Several comments with high pass rates contained ambiguous terminology or complex sentence structures that likely contributed to voter hesitation.",
+        "citations": [25, 31, 45]
+        },
+        {
+        "text": "These linguistically complex statements often combined multiple concepts or used specialized terminology without clear definitions.",
+        "citations": [52, 54, 61]
+        }
+        ]
+        }
+        ]
+        }
+        ]
+        }
+    </example>
+    <data>
+        INSERT_DATA_HERE
+    </data>
+</polisAnalysisPrompt>

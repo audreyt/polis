@@ -1,0 +1,47 @@
+{{!-- Copyright (C) 2012-present, The Authors. This program is free software: you can redistribute it and/or  modify it under the terms of the GNU Affero General Public License, version 3, as published by the Free Software Foundation. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details. You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>. --}}
+
+<div
+  id="readReactView"
+  style="margin-bottom: -40px;"
+  >
+
+  {{!-- Top of "Card stack" --}}
+  <div
+  	class="
+  		custom_gutter
+  		lightPanel
+  		"
+  	style="
+  		position:relative;
+  		top: 0px;
+  		z-index: 3;
+  		{{!-- min-height: 144px; attempt to avoid flashing on vote view load--}}
+  	">
+  		{{view voteView}}
+	</div>
+
+  {{!-- Empty "Card stack" div1 (notice css "top" and "width") --}}
+	<div
+		style="
+			min-height: 30px;
+			position:relative;
+			top: -26px;
+			z-index: 2;
+			margin: 0 auto;
+			width: 99%;
+		"
+		class="lightPanel">
+	</div>
+  {{!-- Empty "Card stack" div2 (notice css "top" and "width") --}}
+	<div
+		style="
+			min-height: 30px;
+			position:relative;
+			top: -52px;
+			z-index: 1;
+			margin: 0 auto;
+			width: 98%;
+		"
+		class="lightPanel">
+	</div>
+</div>

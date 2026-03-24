@@ -1,0 +1,14 @@
+.bashrc
+.DS_Store
+.env_always
+.polis_env
+.polis_s3_creds_client.json
+.sass-cache/*
+*.log
+build
+coverage
+devel
+dist
+js/tmpl/
+node_modules
+scratch

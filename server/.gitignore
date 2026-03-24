@@ -1,0 +1,9 @@
+.env
+.google_creds_temp
+.venv/
+coverage/
+dist
+keys/
+logs/
+node_modules/
+npm-debug.log*

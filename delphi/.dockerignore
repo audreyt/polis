@@ -1,0 +1,92 @@
+# VCS
+.git/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Virtual environments
+polis_env/
+delphi_env/
+delphi-dev-env/
+venv/
+ENV/
+env/
+.env
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Data files
+data/
+*.csv
+*.json
+*.npy
+*.pkl
+*.db
+*.sqlite
+
+# Development files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Pytest cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+
+# Generated files
+*.so
+
+# Testing
+tests/
+*.test.py
+*_test.py
+test_*.py
+.tox/
+.nox/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+.pre-commit-config.yaml
+
+# Development tools
+.bandit
+bandit-report.json
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Notebooks
+notebooks/
+*.ipynb
+
+# Build artifacts
+requirements-dev.txt
+requirements-prod.txt
